@@ -1,13 +1,13 @@
-import type { FixupConfigArray } from '@eslint/compat';
-import { fixupConfigRules } from '@eslint/compat';
-import { FlatCompat } from '@eslint/eslintrc';
-import js from '@eslint/js';
-import eslintPluginImportX from 'eslint-plugin-import-x';
-import jsxA11y from 'eslint-plugin-jsx-a11y';
-import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
-import reactPlugin from 'eslint-plugin-react';
-import globals from 'globals';
-import ts from 'typescript-eslint';
+import type { FixupConfigArray } from '@eslint/compat'
+import { fixupConfigRules } from '@eslint/compat'
+import { FlatCompat } from '@eslint/eslintrc'
+import js from '@eslint/js'
+import eslintPluginImportX from 'eslint-plugin-import-x'
+import jsxA11y from 'eslint-plugin-jsx-a11y'
+import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
+import reactPlugin from 'eslint-plugin-react'
+import globals from 'globals'
+import ts from 'typescript-eslint'
 
 export default ts.config(
   // Shared configs
@@ -50,14 +50,15 @@ export default ts.config(
       },
     },
     rules: {
-      'react/react-in-jsx-scope': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/consistent-type-imports': 'error',
       'import-x/no-unresolved': 'off',
       'import-x/no-named-as-default-member': 'off',
-      '@typescript-eslint/consistent-type-imports': 'error',
+      'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
     },
     linterOptions: {
       reportUnusedDisableDirectives: 'error',
     },
   },
-);
+)

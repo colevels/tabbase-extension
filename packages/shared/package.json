@@ -23,6 +23,14 @@
   },
   "devDependencies": {
     "@extension/storage": "workspace:*",
-    "@extension/tsconfig": "workspace:*"
+    "@extension/tsconfig": "workspace:*",
+    "@types/lodash": "^4.17.16",
+    "@types/redux-logger": "^3.0.13"
+  },
+  "dependencies": {
+    "@reduxjs/toolkit": "^2.6.1",
+    "lodash": "^4.17.21",
+    "react-redux": "^9.2.0",
+    "redux-logger": "^3.0.6"
   }
 }
