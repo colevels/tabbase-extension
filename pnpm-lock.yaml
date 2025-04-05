@@ -521,6 +521,9 @@ importers:
       '@extension/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      react-redux:
+        specifier: ^9.2.0
+        version: 9.2.0(@types/react@19.0.8)(react@19.0.0)(redux@5.0.1)
     devDependencies:
       '@extension/tailwindcss-config':
         specifier: workspace:*
