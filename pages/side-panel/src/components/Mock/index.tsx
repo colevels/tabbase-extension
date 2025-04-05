@@ -4,7 +4,7 @@ import styles from './Mock.module.scss'
 
 const Mock: React.FC = () => {
   return (
-    <div className={classNames(styles.container)}>
+    <div className={classNames(styles.Container)}>
       <div>AA</div>
     </div>
   )
