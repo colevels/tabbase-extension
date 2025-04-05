@@ -24,6 +24,8 @@
     "@extension/shared": "workspace:*",
     "@extension/storage": "workspace:*",
     "@extension/ui": "workspace:*",
+    "classnames": "^2.5.1",
+    "postcss-simple-vars": "^7.0.1",
     "react-redux": "^9.2.0"
   },
   "devDependencies": {

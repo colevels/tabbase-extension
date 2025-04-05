@@ -6,6 +6,7 @@ import type { TabExtend } from '../../../utils/index.js'
 
 import { createAppSlice } from '../../createAppSlice.js'
 import type { AppThunk, RootState } from '../../store.js'
+import { examplePinTabsStorage } from '@extension/storage'
 
 type UniqueIdentifier = string | number
 
@@ -33,6 +34,9 @@ export interface tabSliceState {
     tabId: number | null
   }
   spaces: Space[]
+  spacesMap: {
+    [key: number]: Space
+  }
   containers: Items
   containersIds: string[]
 }
@@ -40,17 +44,24 @@ export interface tabSliceState {
 const initialState: tabSliceState = {
   value: 0,
   status: 'idle',
+
   tabGroups: [],
+
   tabs: [],
   tabsMap: {},
+
   windows: [],
   events: [],
+
   spaces: [],
+  spacesMap: {},
+
   context: {
     windowId: -99,
     tabId: -99,
   },
   containers: {
+    pinTabs: [],
     A: createRange(10, index => `A${index + 1}`),
     B: createRange(10, index => `B${index + 1}`),
     C: createRange(10, index => `C${index + 1}`),
@@ -232,12 +243,12 @@ export const tabSlice = createAppSlice({
       },
     ),
 
-    onActGetActiveTabAndWindow: create.asyncThunk(
+    onActSetContext: create.asyncThunk(
       async () => {
         const window = await chrome.windows.getCurrent()
-        const tab = await chrome.tabs.query({ active: true, windowId: window.id })
+        const tabs = await chrome.tabs.query({ active: true, windowId: window.id })
         return {
-          tabId: tab.length === 0 ? null : isUndefined(tab[0].id) ? null : tab[0].id,
+          tabId: tabs.length === 0 ? null : isUndefined(tabs[0].id) ? null : tabs[0].id,
           windowId: isUndefined(window.id) ? null : window.id,
         }
       },
@@ -366,6 +377,25 @@ export const tabSlice = createAppSlice({
         },
       },
     ),
+
+    onActPinTab: create.asyncThunk(
+      async () => {
+        // console.log('space', space)
+        examplePinTabsStorage.setTab('A1', {})
+        return null
+      },
+      {
+        pending: state => {
+          state.status = 'loading'
+        },
+        fulfilled: (state, action) => {
+          state.status = 'idle'
+        },
+        rejected: state => {
+          state.status = 'failed'
+        },
+      },
+    ),
   }),
   selectors: {
     selectCount: counter => counter.value,
@@ -388,10 +418,11 @@ export const {
   onActTabGroupDeleted,
   onActTabGroupUpdated,
   onActGetWindows,
-  onActGetActiveTabAndWindow,
+  onActSetContext,
   onActActiveTab,
   onActCloseTabs,
   onActCreateSpace,
+  onActPinTab,
 } = tabSlice.actions
 
 export const { selectCount, selectStatus } = tabSlice.selectors
