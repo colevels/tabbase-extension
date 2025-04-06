@@ -396,6 +396,15 @@ export const tabSlice = createAppSlice({
         },
       },
     ),
+
+    updateItems: create.reducer((state, action: PayloadAction<{ id: UniqueIdentifier; items: UniqueIdentifier[] }>) => {
+      // setItems(items => ({
+      //   ...items,
+      //   [overContainer]: arrayMove(items[overContainer], activeIndex, overIndex),
+      // }))
+
+      state.containers[action.payload.id] = action.payload.items
+    }),
   }),
   selectors: {
     selectCount: counter => counter.value,
@@ -423,6 +432,7 @@ export const {
   onActCloseTabs,
   onActCreateSpace,
   onActPinTab,
+  updateItems,
 } = tabSlice.actions
 
 export const { selectCount, selectStatus } = tabSlice.selectors

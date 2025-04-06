@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { Item } from './Item'
+
+import type React from 'react'
 import type { UniqueIdentifier } from '@dnd-kit/core'
 
 interface SortableItemProps {

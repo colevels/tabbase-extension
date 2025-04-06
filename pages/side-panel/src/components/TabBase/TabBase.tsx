@@ -33,7 +33,7 @@ import { Item as ItemPin } from './SortableItemPin/Item'
 
 import styles from './TabBaseContainer.module.css'
 import { useAppSelector, useAppDispatch } from '@extension/shared'
-// import { updateItems } from '@extension/shared/lib/redux/features/tab/tab.slice'
+import { updateItems } from '@extension/shared/lib/redux/features/tab/tab.slice'
 // import { Button } from '@mantine/core'
 
 const dropAnimation: DropAnimation = {
@@ -75,22 +75,9 @@ export const TRASH_ID = 'void'
 
 export function MultipleContainers({
   adjustScale = false,
-  itemCount = 3,
-
-  items: initialItems,
   getItemStyles = () => ({}),
   wrapperStyle = () => ({}),
 }: Props) {
-  // const [items, setItems] = useState<Items>(
-  //   () =>
-  //     initialItems ?? {
-  //       A: createRange(itemCount, index => `A${index + 1}`),
-  //       B: createRange(itemCount, index => `B${index + 1}`),
-  //       C: createRange(itemCount, index => `C${index + 1}`),
-  //       D: createRange(itemCount, index => `D${index + 1}`),
-  //     },
-  // )
-  // const [containers, setContainers] = useState(Object.keys(items) as UniqueIdentifier[])
   const dispatch = useAppDispatch()
   const { items, containers } = useAppSelector(state => {
     return {
@@ -99,12 +86,13 @@ export function MultipleContainers({
     }
   })
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
+
   const lastOverId = useRef<UniqueIdentifier | null>(null)
   const recentlyMovedToNewContainer = useRef(false)
   // const isSortingContainer = activeId != null ? containers.includes(activeId) : false
 
   const onClick = () => {
-    // dispatch(updateItems({ id: 'B', items: ['B1', 'B7', 'B2', 'B3', 'B4', 'B5', 'B6', 'B8', 'B9', 'B10'] }))
+    dispatch(updateItems({ id: 'B', items: ['B1', 'B7', 'B2', 'B3', 'B4', 'B5', 'B6', 'B8', 'B9', 'B10'] }))
   }
 
   /**
@@ -280,19 +268,23 @@ export function MultipleContainers({
 
           recentlyMovedToNewContainer.current = true
 
-          // dispatch(updateItems({
-          //   id: activeContainer,
-          //   items: items[activeContainer].filter(item => item !== active.id),
-          // }))
+          dispatch(
+            updateItems({
+              id: activeContainer,
+              items: items[activeContainer].filter(item => item !== active.id),
+            }),
+          )
 
-          // dispatch(updateItems({
-          //   id: overContainer,
-          //   items: [
-          //     ...items[overContainer].slice(0, newIndex),
-          //     items[activeContainer][activeIndex],
-          //     ...items[overContainer].slice(newIndex, items[overContainer].length),
-          //   ],
-          // }))
+          dispatch(
+            updateItems({
+              id: overContainer,
+              items: [
+                ...items[overContainer].slice(0, newIndex),
+                items[activeContainer][activeIndex],
+                ...items[overContainer].slice(newIndex, items[overContainer].length),
+              ],
+            }),
+          )
 
           // setItems(items => {
           //   const activeItems = items[activeContainer]
@@ -375,7 +367,7 @@ export function MultipleContainers({
 
           if (activeIndex !== overIndex) {
             console.log('over container')
-            // dispatch(updateItems({ id: overContainer, items: arrayMove(items[overContainer], activeIndex, overIndex) }))
+            dispatch(updateItems({ id: overContainer, items: arrayMove(items[overContainer], activeIndex, overIndex) }))
             // setItems(items => ({
             //   ...items,
             //   [overContainer]: arrayMove(items[overContainer], activeIndex, overIndex),
@@ -385,13 +377,8 @@ export function MultipleContainers({
 
         setActiveId(null)
       }}
-      // cancelDrop={CancelDrop}
       onDragCancel={onDragCancel}>
       <div className={styles.TabBaseContainer}>
-        <div style={{ padding: '20px 20px 0px 20px' }}>
-          <div>PIN TAB</div>
-        </div>
-        {/* <Button onClick={() => onClick()}>CL</Button> */}
         <GridContainer columns={5}>
           <SortableContext items={items['B']} strategy={rectSortingStrategy}>
             {items['B'].map((value, index) => {
@@ -419,20 +406,20 @@ export function MultipleContainers({
         <DroppableContainer
           key={containerId}
           id={containerId}
-          items={items[containerId]}
-          onRemove={() => handleRemove(containerId)}>
+          // onRemove={() => handleRemove(containerId)}
+          items={items[containerId]}>
           <SortableContext items={items[containerId]} strategy={verticalListSortingStrategy}>
             {items[containerId].map((value, index) => {
               return (
                 <SortableItem
                   key={value}
+                  containerId={containerId}
                   id={value}
                   index={index}
                   // disabled={isSortingContainer}
-                  handle={true}
+                  handle={false}
                   style={getItemStyles}
                   wrapperStyle={wrapperStyle}
-                  containerId={containerId}
                   getIndex={getIndex}
                 />
               )

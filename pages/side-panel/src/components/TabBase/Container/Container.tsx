@@ -9,11 +9,10 @@ export interface Props {
   style?: React.CSSProperties
   hover?: boolean
   onClick?(): void
-  onRemove?(): void
 }
 
 export const Container = forwardRef<HTMLDivElement, Props>(
-  ({ children, hover, style, onRemove, onClick, ...props }: Props, ref) => {
+  ({ children, hover, style, onClick, ...props }: Props, ref) => {
     return (
       <div
         {...props}
