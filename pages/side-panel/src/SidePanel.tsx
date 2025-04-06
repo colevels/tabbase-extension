@@ -7,7 +7,7 @@ import { t } from '@extension/i18n'
 import ChromeEventProvider from './components/ChromeEventProvider'
 import Tabs from './components/Tabs'
 import PinTabs from './components/PinTabs'
-import Test from './components/TabBase/index'
+import Test from './components/TabBaseExample'
 
 const SidePanel = () => {
   const theme = useStorage(exampleThemeStorage)
