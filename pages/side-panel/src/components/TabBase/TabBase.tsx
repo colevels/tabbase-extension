@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import type React from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type {
   CancelDrop,
@@ -22,19 +23,17 @@ import {
 } from '@dnd-kit/core'
 import { SortableContext, arrayMove, verticalListSortingStrategy, rectSortingStrategy } from '@dnd-kit/sortable'
 
-import { createRange } from './utils'
-
 import SortableItem from './SortableItem'
-import SortableItemPin from './SortableItemPin'
 import DroppableContainer from './DroppableContainer'
+
 import { GridContainer } from './GridContainer'
 import { Item } from './SortableItem/Item'
 import { Item as ItemPin } from './SortableItemPin/Item'
 
 import styles from './TabBaseContainer.module.css'
+
 import { useAppSelector, useAppDispatch } from '@extension/shared'
 import { updateItems } from '@extension/shared/lib/redux/features/tab/tab.slice'
-// import { Button } from '@mantine/core'
 
 const dropAnimation: DropAnimation = {
   sideEffects: defaultDropAnimationSideEffects({
@@ -79,22 +78,17 @@ export function MultipleContainers({
   wrapperStyle = () => ({}),
 }: Props) {
   const dispatch = useAppDispatch()
-  const { items, containers } = useAppSelector(state => {
+  const { items } = useAppSelector(state => {
     return {
-      containers: state.tab.containersIds,
       items: state.tab.containers,
     }
   })
-  let containerId = 'tabs'
+  const containerId = 'tabs'
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
 
   const lastOverId = useRef<UniqueIdentifier | null>(null)
   const recentlyMovedToNewContainer = useRef(false)
   // const isSortingContainer = activeId != null ? containers.includes(activeId) : false
-
-  const onClick = () => {
-    dispatch(updateItems({ id: 'pinTabs', items: ['B1', 'B7', 'B2', 'B3', 'B4', 'B5', 'B6', 'B8', 'B9', 'B10'] }))
-  }
 
   /**
    * Custom collision detection strategy optimized for multiple containers
@@ -115,11 +109,7 @@ export function MultipleContainers({
 
       // Start by finding any intersecting droppable
       const pointerIntersections = pointerWithin(args)
-      const intersections =
-        pointerIntersections.length > 0
-          ? // If there are droppables intersecting with the pointer, return those
-            pointerIntersections
-          : rectIntersection(args)
+      const intersections = pointerIntersections.length > 0 ? pointerIntersections : rectIntersection(args)
       let overId = getFirstCollision(intersections, 'id')
 
       if (overId != null) {
@@ -206,11 +196,6 @@ export function MultipleContainers({
       recentlyMovedToNewContainer.current = false
     })
   }, [items])
-
-  // const containerId = containers[0]
-
-  console.log('items', items)
-  console.log('items[containerId]', items[containerId])
 
   return (
     <DndContext
@@ -477,10 +462,5 @@ export function MultipleContainers({
         dragOverlay
       />
     )
-  }
-
-  function handleRemove(containerID: UniqueIdentifier) {
-    // setContainers(containers => containers.filter(id => id !== containerID))
-    console.log('handle remove', containerID)
   }
 }

@@ -1,12 +1,15 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
-import _, { isUndefined } from 'lodash'
+import _ from 'lodash'
+
+import { examplePinTabsStorage } from '@extension/storage'
 
 import { formatTabs } from '../../../utils/index.js'
-import type { TabExtend } from '../../../utils/index.js'
+import { createRange } from './utils.js'
 
 import { createAppSlice } from '../../createAppSlice.js'
-import type { AppThunk, RootState } from '../../store.js'
-import { examplePinTabsStorage } from '@extension/storage'
+
+import type { TabExtend } from '../../../utils/index.js'
+import type { RootState } from '../../store.js'
 
 type UniqueIdentifier = string | number
 
@@ -27,6 +30,7 @@ export interface tabSliceState {
   tabGroups: chrome.tabGroups.TabGroup[]
   tabs: TabExtend[]
   tabsMap: { [key: number]: TabExtend }
+  tabIds: number[]
   windows: chrome.windows.Window[]
   events: string[]
   context: {
@@ -49,6 +53,7 @@ const initialState: tabSliceState = {
 
   tabs: [],
   tabsMap: {},
+  tabIds: [],
 
   windows: [],
   events: [],
@@ -61,54 +66,33 @@ const initialState: tabSliceState = {
     tabId: -99,
   },
   containers: {
-    pinTabs: [],
     A: createRange(10, index => `A${index + 1}`),
     B: createRange(10, index => `B${index + 1}`),
     C: createRange(10, index => `C${index + 1}`),
     D: createRange(10, index => `D${index + 1}`),
+    tabs: [],
+    pinTabs: createRange(4, index => `P${index + 1}`),
   },
-  containersIds: ['A', 'B', 'C', 'D'],
-}
-
-const defaultInitializer = (index: number) => index
-
-function createRange<T = number>(length: number, initializer: (index: number) => any = defaultInitializer): T[] {
-  return [...new Array(length)].map((_, index) => initializer(index))
+  containersIds: ['A', 'B', 'C', 'D', 'tabs', 'pinTabs'],
 }
 
 export const tabSlice = createAppSlice({
   name: 'tab',
   initialState,
   reducers: create => ({
-    increment: create.reducer(state => {
-      state.value += 1
-    }),
-    decrement: create.reducer(state => {
-      state.value -= 1
-    }),
-    updateTab: create.reducer((state, action: PayloadAction<string>) => {
-      state.events.push(action.payload)
-      console.log(action.payload)
-    }),
-
-    incrementByAmount: create.reducer((state, action: PayloadAction<number>) => {
-      state.value += action.payload
-    }),
-
     onActGetTabs: create.asyncThunk(
       async () => {
         const response = await chrome.tabs.query({})
-        return formatTabs(response)
+        const tabs = formatTabs(response)
+        const tabIds = tabs.map(o => o.id)
+        return { tabs, tabIds }
       },
       {
         pending: state => {
           state.status = 'loading'
         },
         fulfilled: (state, action) => {
-          state.status = 'idle'
-          state.tabs = action.payload
-
-          const tabsMap: { [key: number]: TabExtend } = action.payload.reduce(
+          const tabsMap: { [key: number]: TabExtend } = action.payload.tabs.reduce(
             (acc: { [key: number]: TabExtend }, tab: TabExtend) => {
               if (tab.id) {
                 acc[tab.id] = tab
@@ -118,9 +102,16 @@ export const tabSlice = createAppSlice({
             {},
           )
 
-          state.tabsMap = tabsMap
+          state.status = 'idle'
 
-          // find active tab
+          state.tabs = action.payload.tabs
+          state.tabsMap = tabsMap
+          state.tabIds = action.payload.tabIds
+
+          state.containers = {
+            ...state.containers,
+            tabs: action.payload.tabIds,
+          }
         },
         rejected: state => {
           state.status = 'failed'
@@ -208,21 +199,9 @@ export const tabSlice = createAppSlice({
       },
     ),
 
-    onActTabGroupCreated: create.reducer((state, action: PayloadAction<{ tabGroup: chrome.tabGroups.TabGroup }>) => {
-      // state.tabGroups.push(action.payload.tabGroup)
-      // state.tabGroups = _.uniqBy(state.tabGroups, o => o.id)
-    }),
-    onActTabGroupUpdated: create.reducer((state, action: PayloadAction<{ tabGroup: chrome.tabGroups.TabGroup }>) => {
-      // const index = _.findIndex(state.tabGroups, o => o.id === action.payload.tabGroup.id)
-      // if (index > -1) {
-      //   state.tabGroups[index] = action.payload.tabGroup
-      // }
-      // state.tabGroups = _.uniqBy(state.tabGroups, o => o.id)
-    }),
-    onActTabGroupDeleted: create.reducer((state, action: PayloadAction<{ tabGroup: chrome.tabGroups.TabGroup }>) => {
-      // _.remove(state.tabGroups, o => o.id === action.payload.tabGroup.id)
-      // state.tabGroups = _.uniqBy(state.tabGroups, o => o.id)
-    }),
+    onActTabGroupCreated: create.reducer((state, action: PayloadAction<{ tabGroup: chrome.tabGroups.TabGroup }>) => {}),
+    onActTabGroupUpdated: create.reducer((state, action: PayloadAction<{ tabGroup: chrome.tabGroups.TabGroup }>) => {}),
+    onActTabGroupDeleted: create.reducer((state, action: PayloadAction<{ tabGroup: chrome.tabGroups.TabGroup }>) => {}),
 
     onActGetWindows: create.asyncThunk(
       async () => {
@@ -248,8 +227,8 @@ export const tabSlice = createAppSlice({
         const window = await chrome.windows.getCurrent()
         const tabs = await chrome.tabs.query({ active: true, windowId: window.id })
         return {
-          tabId: tabs.length === 0 ? null : isUndefined(tabs[0].id) ? null : tabs[0].id,
-          windowId: isUndefined(window.id) ? null : window.id,
+          tabId: tabs.length === 0 ? null : _.isUndefined(tabs[0].id) ? null : tabs[0].id,
+          windowId: _.isUndefined(window.id) ? null : window.id,
         }
       },
       {
@@ -258,6 +237,7 @@ export const tabSlice = createAppSlice({
         },
         fulfilled: (state, action) => {
           state.context = {
+            ...state.context,
             tabId: action.payload.tabId,
             windowId: action.payload.windowId,
           }
@@ -278,7 +258,7 @@ export const tabSlice = createAppSlice({
         pending: state => {
           state.status = 'loading'
         },
-        fulfilled: (state, action) => {
+        fulfilled: state => {
           state.status = 'idle'
         },
         rejected: state => {
@@ -413,10 +393,6 @@ export const tabSlice = createAppSlice({
 })
 
 export const {
-  decrement,
-  increment,
-  incrementByAmount,
-  updateTab,
   onActGetTabs,
   onActTabCreated,
   onActTabUpdated,
@@ -436,13 +412,3 @@ export const {
 } = tabSlice.actions
 
 export const { selectCount, selectStatus } = tabSlice.selectors
-
-export const incrementIfOdd =
-  (amount: number): AppThunk =>
-  (dispatch, getState) => {
-    const currentValue = selectCount(getState())
-
-    if (currentValue % 2 === 1 || currentValue % 2 === -1) {
-      dispatch(incrementByAmount(amount))
-    }
-  }

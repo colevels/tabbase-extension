@@ -7,7 +7,7 @@ import { t } from '@extension/i18n'
 import ChromeEventProvider from './components/ChromeEventProvider'
 import Tabs from './components/Tabs'
 import PinTabs from './components/PinTabs'
-import Test from './components/TabBaseExample'
+import TabBase from './components/TabBase'
 
 const SidePanel = () => {
   const theme = useStorage(exampleThemeStorage)
@@ -17,7 +17,7 @@ const SidePanel = () => {
     <ChromeEventProvider>
       <div className={`App ${isLight ? 'bg-slate-50' : 'bg-gray-800'}`}>
         <div>Space</div>
-        <Test />
+        <TabBase />
         <PinTabs />
         <Tabs />
         <div>Tab Box</div>
