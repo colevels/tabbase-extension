@@ -28,13 +28,14 @@ import SortableItemCustom from './SortableItemCustom'
 import DroppableContainer from './DroppableContainer'
 import DroppableContainerGrid from './DroppableContainerGrid'
 
+import { GridContainer } from './GridContainer'
 import { Item } from './SortableItem/Item'
 
 import styles from './TabBaseContainer.module.css'
 
 import { useAppSelector, useAppDispatch } from '@extension/shared'
 import { onActPinTab, updateItems } from '@extension/shared/lib/redux/features/tab/tab.slice'
-import { selectContainersSpacesDisplay } from '@extension/shared/lib/redux/features/tab/tab.selector'
+import { selectTabContainers } from '@extension/shared/lib/redux/features/tab/tab.selector'
 
 const dropAnimation: DropAnimation = {
   sideEffects: defaultDropAnimationSideEffects({
@@ -79,7 +80,7 @@ export function MultipleContainers({
 }: Props) {
   const dispatch = useAppDispatch()
 
-  const { containers, tabsMap } = useAppSelector(selectContainersSpacesDisplay)
+  const { containers, tabsMap } = useAppSelector(selectTabContainers)
   console.log('containers', containers)
   console.log('tabsMap', tabsMap)
   const containerId = 'tabs'

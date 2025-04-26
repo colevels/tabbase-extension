@@ -28,14 +28,18 @@
     "@extension/shared": "workspace:*",
     "@extension/storage": "workspace:*",
     "@extension/ui": "workspace:*",
+    "@mantine/core": "^7.17.4",
+    "@mantine/hooks": "^7.17.4",
     "classnames": "^2.5.1",
-    "postcss-simple-vars": "^7.0.1",
     "react-redux": "^9.2.0"
   },
   "devDependencies": {
     "@extension/tailwindcss-config": "workspace:*",
     "@extension/tsconfig": "workspace:*",
-    "@extension/vite-config": "workspace:*"
+    "@extension/vite-config": "workspace:*",
+    "postcss": "^8.5.2",
+    "postcss-preset-mantine": "^1.17.0",
+    "postcss-simple-vars": "^7.0.1"
   },
   "postcss": {
     "plugins": {

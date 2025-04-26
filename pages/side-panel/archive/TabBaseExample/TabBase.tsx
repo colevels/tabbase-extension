@@ -1,6 +1,7 @@
-import type React from 'react'
-import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useCallback, useEffect, useRef, useState } from 'react'
+
+import type React from 'react'
 import type {
   CancelDrop,
   CollisionDetection,
@@ -24,17 +25,13 @@ import {
 import { SortableContext, arrayMove, verticalListSortingStrategy, rectSortingStrategy } from '@dnd-kit/sortable'
 
 import SortableItem from './SortableItem'
-import SortableItemCustom from './SortableItemCustom'
 import DroppableContainer from './DroppableContainer'
-import DroppableContainerGrid from './DroppableContainerGrid'
-
+import { GridContainer } from './GridContainer'
 import { Item } from './SortableItem/Item'
 
 import styles from './TabBaseContainer.module.css'
-
 import { useAppSelector, useAppDispatch } from '@extension/shared'
-import { onActPinTab, updateItems } from '@extension/shared/lib/redux/features/tab/tab.slice'
-import { selectContainersSpacesDisplay } from '@extension/shared/lib/redux/features/tab/tab.selector'
+import { updateItems } from '@extension/shared/lib/redux/features/tab/tab.slice'
 
 const dropAnimation: DropAnimation = {
   sideEffects: defaultDropAnimationSideEffects({
@@ -51,6 +48,7 @@ type Items = Record<UniqueIdentifier, UniqueIdentifier[]>
 interface Props {
   adjustScale?: boolean
   cancelDrop?: CancelDrop
+  columns?: number
   containerStyle?: React.CSSProperties
   coordinateGetter?: KeyboardCoordinateGetter
   getItemStyles?(args: {
@@ -78,16 +76,21 @@ export function MultipleContainers({
   wrapperStyle = () => ({}),
 }: Props) {
   const dispatch = useAppDispatch()
-
-  const { containers, tabsMap } = useAppSelector(selectContainersSpacesDisplay)
-  console.log('containers', containers)
-  console.log('tabsMap', tabsMap)
-  const containerId = 'tabs'
+  const { items, containers } = useAppSelector(state => {
+    return {
+      containers: state.tab.containersIds,
+      items: state.tab.containers,
+    }
+  })
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
 
   const lastOverId = useRef<UniqueIdentifier | null>(null)
   const recentlyMovedToNewContainer = useRef(false)
   // const isSortingContainer = activeId != null ? containers.includes(activeId) : false
+
+  const onClick = () => {
+    dispatch(updateItems({ id: 'B', items: ['B1', 'B7', 'B2', 'B3', 'B4', 'B5', 'B6', 'B8', 'B9', 'B10'] }))
+  }
 
   /**
    * Custom collision detection strategy optimized for multiple containers
@@ -99,16 +102,20 @@ export function MultipleContainers({
    */
   const collisionDetectionStrategy: CollisionDetection = useCallback(
     args => {
-      if (activeId && activeId in containers) {
+      if (activeId && activeId in items) {
         return closestCenter({
           ...args,
-          droppableContainers: args.droppableContainers.filter(container => container.id in containers),
+          droppableContainers: args.droppableContainers.filter(container => container.id in items),
         })
       }
 
       // Start by finding any intersecting droppable
       const pointerIntersections = pointerWithin(args)
-      const intersections = pointerIntersections.length > 0 ? pointerIntersections : rectIntersection(args)
+      const intersections =
+        pointerIntersections.length > 0
+          ? // If there are droppables intersecting with the pointer, return those
+            pointerIntersections
+          : rectIntersection(args)
       let overId = getFirstCollision(intersections, 'id')
 
       if (overId != null) {
@@ -118,10 +125,10 @@ export function MultipleContainers({
           return intersections
         }
 
-        if (overId in containers) {
-          const containerItems = containers[overId]
+        if (overId in items) {
+          const containerItems = items[overId]
 
-          // If a container is matched and it contains items (columns 'A', 'pinTabs', 'C')
+          // If a container is matched and it contains items (columns 'A', 'B', 'C')
           if (containerItems.length > 0) {
             // Return the closest droppable within that container
             overId = closestCenter({
@@ -149,28 +156,31 @@ export function MultipleContainers({
       // If no droppable is matched, return the last match
       return lastOverId.current ? [{ id: lastOverId.current }] : []
     },
-    [activeId, containers],
+    [activeId, items],
   )
   const [clonedItems, setClonedItems] = useState<Items | null>(null)
   const sensors = useSensors(useSensor(MouseSensor))
 
-  const findContainer = (id: UniqueIdentifier) => {
-    if (id in containers) {
+  const findContainer = (id: UniqueIdentifier, source?: string) => {
+    console.log('source', source)
+    if (id in items) {
+      console.log('x1')
       return id
     }
 
-    return Object.keys(containers).find(key => containers[key].includes(id))
+    console.log('x2')
+    return Object.keys(items).find(key => items[key].includes(id))
   }
 
   const getIndex = (id: UniqueIdentifier) => {
-    // console.log('get index', id)
+    console.log('get index', id)
     const container = findContainer(id)
 
     if (!container) {
       return -1
     }
 
-    const index = containers[container].indexOf(id)
+    const index = items[container].indexOf(id)
 
     return index
   }
@@ -191,7 +201,12 @@ export function MultipleContainers({
     requestAnimationFrame(() => {
       recentlyMovedToNewContainer.current = false
     })
-  }, [containers])
+  }, [items])
+
+  const containerId = containers[0]
+
+  console.log('items', items)
+  console.log('items[containerId]', items[containerId])
 
   return (
     <DndContext
@@ -204,36 +219,38 @@ export function MultipleContainers({
       }}
       onDragStart={({ active }) => {
         setActiveId(active.id)
-        setClonedItems(containers)
+        setClonedItems(items)
       }}
       onDragOver={({ active, over }) => {
-        console.log('active and over: ', { active, over })
-
+        console.log('ondrag over')
         const overId = over?.id
+        console.log('over id: ', overId)
+        console.log('active id: ', active.id)
 
-        if (overId == null || overId === TRASH_ID || active.id in containers) {
+        if (overId == null || overId === TRASH_ID || active.id in items) {
           return
         }
 
         const overContainer = findContainer(overId)
         const activeContainer = findContainer(active.id)
-        console.log({ overContainer, activeContainer })
 
         if (!overContainer || !activeContainer) {
           return
         }
 
+        console.log({ overContainer, activeContainer })
+
         if (activeContainer !== overContainer) {
           console.log('over container')
 
-          const activeItems = containers[activeContainer]
-          const overItems = containers[overContainer]
+          const activeItems = items[activeContainer]
+          const overItems = items[overContainer]
           const overIndex = overItems.indexOf(overId)
           const activeIndex = activeItems.indexOf(active.id)
 
           let newIndex: number
 
-          if (overId in containers) {
+          if (overId in items) {
             newIndex = overItems.length + 1
           } else {
             const isBelowOverItem =
@@ -248,28 +265,10 @@ export function MultipleContainers({
 
           recentlyMovedToNewContainer.current = true
 
-          console.log({
-            activeContainer,
-            overContainer,
-          })
-
-          // const pinTabIndex = _.findIndex([activeContainer, overContainer])
-          // console.log('pinTabIndex', pinTabIndex)
-
-          if (activeContainer === 'pinTabs' && overContainer !== 'pinTabs') {
-            const tabId = containers[activeContainer][activeIndex]
-            dispatch(onActPinTab({ tabId }))
-          }
-
-          if (activeContainer !== 'pinTabs' && overContainer === 'pinTabs') {
-            const tabId = containers[activeContainer][activeIndex]
-            dispatch(onActPinTab({ tabId }))
-          }
-
           dispatch(
             updateItems({
               id: activeContainer,
-              items: containers[activeContainer].filter(item => item !== active.id),
+              items: items[activeContainer].filter(item => item !== active.id),
             }),
           )
 
@@ -277,9 +276,9 @@ export function MultipleContainers({
             updateItems({
               id: overContainer,
               items: [
-                ...containers[overContainer].slice(0, newIndex),
-                containers[activeContainer][activeIndex],
-                ...containers[overContainer].slice(newIndex, containers[overContainer].length),
+                ...items[overContainer].slice(0, newIndex),
+                items[activeContainer][activeIndex],
+                ...items[overContainer].slice(newIndex, items[overContainer].length),
               ],
             }),
           )
@@ -322,7 +321,7 @@ export function MultipleContainers({
       onDragEnd={({ active, over }) => {
         console.log('on drag end', { active, over })
 
-        if (active.id in containers && over?.id) {
+        if (active.id in items && over?.id) {
           // setContainers(containers => {
           //   const activeIndex = containers.indexOf(active.id)
           //   const overIndex = containers.indexOf(over.id)
@@ -347,113 +346,107 @@ export function MultipleContainers({
           return
         }
 
-        // if (overId === TRASH_ID) {
-        //   // setItems(items => ({
-        //   //   ...items,
-        //   //   [activeContainer]: items[activeContainer].filter(id => id !== activeId),
-        //   // }))
-        //   setActiveId(null)
-        //   console.log('trash')
-        //   return
-        // }
+        if (overId === TRASH_ID) {
+          // setItems(items => ({
+          //   ...items,
+          //   [activeContainer]: items[activeContainer].filter(id => id !== activeId),
+          // }))
+          setActiveId(null)
+          console.log('trash')
+          return
+        }
 
         const overContainer = findContainer(overId)
 
         if (overContainer) {
-          const activeIndex = containers[activeContainer].indexOf(active.id)
-          const overIndex = containers[overContainer].indexOf(overId)
+          const activeIndex = items[activeContainer].indexOf(active.id)
+          const overIndex = items[overContainer].indexOf(overId)
 
           if (activeIndex !== overIndex) {
             console.log('over container')
-            dispatch(
-              updateItems({ id: overContainer, items: arrayMove(containers[overContainer], activeIndex, overIndex) }),
-            )
+            dispatch(updateItems({ id: overContainer, items: arrayMove(items[overContainer], activeIndex, overIndex) }))
+            // setItems(items => ({
+            //   ...items,
+            //   [overContainer]: arrayMove(items[overContainer], activeIndex, overIndex),
+            // }))
           }
         }
 
         setActiveId(null)
       }}
       onDragCancel={onDragCancel}>
-      <div>CONTAINER: PIN TABS</div>
       <div className={styles.TabBaseContainer}>
-        <DroppableContainerGrid
-          key={'pinTabs'}
-          id={'pinTabs'}
-          // onRemove={() => handleRemove(containerId)}
-          items={containers['pinTabs']}>
-          <SortableContext items={containers['pinTabs']} strategy={rectSortingStrategy}>
-            {containers['pinTabs'].map((value, index) => {
+        <GridContainer columns={5}>
+          <SortableContext items={items['B']} strategy={rectSortingStrategy}>
+            {items['B'].map((value, index) => {
               return (
-                <SortableItemCustom
-                  tab={tabsMap[value]}
+                <SortableItem
                   key={value}
                   id={value}
                   index={index}
-                  handle={false}
+                  handle={true}
                   style={getItemStyles}
                   wrapperStyle={wrapperStyle}
-                  containerId={'pinTabs'}
+                  containerId={'B'}
                   getIndex={getIndex}
                 />
               )
             })}
           </SortableContext>
-        </DroppableContainerGrid>
+        </GridContainer>
       </div>
 
-      {/* <div className={styles.TabBaseContainer}>
+      <div className={styles.TabBaseContainer}>
         <div style={{ padding: '0px 20px 0px 20px' }}>
-          <div>SUGGEST</div>
+          <div>PIN TAB BY WEBSITE</div>
         </div>
         <DroppableContainer
           key={containerId}
           id={containerId}
           // onRemove={() => handleRemove(containerId)}
-          items={containers[containerId]}>
-          <SortableContext items={containers[containerId]} strategy={verticalListSortingStrategy}>
-            {containers[containerId].map((value, index) => {
+          items={items[containerId]}>
+          <SortableContext items={items[containerId]} strategy={verticalListSortingStrategy}>
+            {items[containerId].map((value, index) => {
               return (
-                <SortableItemCustom
-                  tab={tabsMap[value]}
+                <SortableItem
                   key={value}
+                  containerId={containerId}
                   id={value}
                   index={index}
+                  // disabled={isSortingContainer}
                   handle={false}
                   style={getItemStyles}
                   wrapperStyle={wrapperStyle}
-                  containerId={containerId}
                   getIndex={getIndex}
-                  // disabled={isSortingContainer}
                 />
               )
             })}
           </SortableContext>
         </DroppableContainer>
-      </div> */}
+      </div>
 
       <div className={styles.TabBaseContainer}>
         <div style={{ padding: '0px 20px 0px 20px' }}>
-          <div>CONTAINER: TABS</div>
+          <div>CUSTOM</div>
         </div>
         <DroppableContainer
           key={containerId}
           id={containerId}
           // onRemove={() => handleRemove(containerId)}
-          items={containers[containerId]}>
-          <SortableContext items={containers[containerId]} strategy={verticalListSortingStrategy}>
-            {containers[containerId].map((value, index) => {
+          items={items[containerId]}>
+          <SortableContext items={items[containerId]} strategy={verticalListSortingStrategy}>
+            {items[containerId].map((value, index) => {
               return (
-                <SortableItemCustom
-                  tab={tabsMap[value]}
+                <SortableItem
                   key={value}
+                  containerId={containerId}
                   id={value}
                   index={index}
+                  // disabled={isSortingContainer}
                   handle={false}
                   style={getItemStyles}
                   wrapperStyle={wrapperStyle}
-                  containerId={containerId}
                   getIndex={getIndex}
-                  // disabled={isSortingContainer}
                 />
               )
             })}
@@ -471,11 +464,32 @@ export function MultipleContainers({
   )
 
   function renderSortableItemDragOverlay(id: UniqueIdentifier) {
+    console.log('renderSortableItemDragOverlay', id)
+    if (id === 'B5') {
+      return (
+        <ItemPin
+          value={id + 'VVS'}
+          style={getItemStyles({
+            containerId: findContainer(id, 'xx') as UniqueIdentifier,
+            overIndex: -1,
+            index: getIndex(id),
+            background: 'red',
+            value: id,
+            isSorting: true,
+            isDragging: true,
+            isDragOverlay: true,
+          })}
+          wrapperStyle={wrapperStyle({ index: 0 })}
+          dragOverlay
+        />
+      )
+    }
+
     return (
       <Item
-        value={id}
+        value={id + 'x'}
         style={getItemStyles({
-          containerId: findContainer(id) as UniqueIdentifier,
+          containerId: findContainer(id, 'xx') as UniqueIdentifier,
           overIndex: -1,
           index: getIndex(id),
           background: 'red',
