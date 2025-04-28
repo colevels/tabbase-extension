@@ -10,7 +10,7 @@ const TabSpace = () => {
           maxHeight: '100px',
         }}
         getItemStyles={({ value }) => {
-          // console.log('value', value)
+          console.log('get item styles')
           if (value === 'A1') {
             return {
               height: '100px',

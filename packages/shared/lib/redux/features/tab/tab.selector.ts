@@ -8,6 +8,7 @@ import type { Items } from './types.js'
 const selectTabs = (state: RootState) => state.tab.tabs
 const selectTabGroups = (state: RootState) => state.tab.tabGroups
 const selectTabsMap = (state: RootState) => state.tab.tabsMap
+const selectTabIds = (state: RootState) => state.tab.tabIds
 const selectContext = (state: RootState) => state.tab.context
 // const selectContainers = (state: RootState) => state.tab.containers
 const selectContainersSpaces = (state: RootState) => state.tab.containersSpaces
@@ -36,15 +37,15 @@ export const selectTabContainers = createSelector([selectTabsMap], tabsMap => {
 })
 
 export const selectContainersSpacesDisplay = createSelector(
-  [selectContainersSpaces, seelctActiveContainerSpace, selectTabsMap],
-  (containersSpaces, activeContainerSpace, tabsMap) => {
+  [selectContainersSpaces, seelctActiveContainerSpace, selectTabsMap, selectTabIds],
+  (containersSpaces, activeContainerSpace, tabsMap, tabIds) => {
     let containers: Items = {}
     console.log('containersSpaces', containersSpaces)
     console.log('activeContainerSpace', activeContainerSpace)
 
     const spaces = Object.values(containersSpaces).map(o => {
       if (o.id === activeContainerSpace) {
-        containers = o.containers
+        containers = { ...o.containers }
       }
 
       return {
@@ -52,6 +53,19 @@ export const selectContainersSpacesDisplay = createSelector(
         active: o.id === activeContainerSpace,
       }
     })
+
+    if (!containers.pinTabs) {
+      containers = { ...containers, pinTabs: [] }
+    }
+
+    if (!_.has(containers, 'tabs')) {
+      const pinTabs = containers.pinTabs.map(o => o.toString())
+      const tabIdsNotInPinTabs = _.difference(
+        tabIds.map(o => o.toString()),
+        pinTabs,
+      )
+      containers = { ...containers, tabs: tabIdsNotInPinTabs.map(o => o.toString()) }
+    }
 
     return {
       spaces,

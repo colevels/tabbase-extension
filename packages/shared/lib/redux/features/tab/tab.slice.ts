@@ -7,10 +7,11 @@ import { formatTabs } from '../../../utils/index.js'
 
 import { createAppSlice } from '../../createAppSlice.js'
 
+import type { PayloadAction } from '@reduxjs/toolkit'
+
 import type { TabExtend } from '../../../utils/index.js'
 import type { RootState } from '../../store.js'
-import type { PayloadAction } from '@reduxjs/toolkit'
-import type { UniqueIdentifier, Items, ContainerSpace } from './types.js'
+import type { ContainerSpace, TabMap } from './types.js'
 
 export interface tabSliceState {
   value: number
@@ -20,7 +21,7 @@ export interface tabSliceState {
   tabGroups: chrome.tabGroups.TabGroup[]
   windows: chrome.windows.Window[]
 
-  tabsMap: Record<string, TabExtend>
+  tabsMap: TabMap
   tabIds: number[]
 
   context: {
@@ -28,84 +29,53 @@ export interface tabSliceState {
     tabId: number | null
   }
 
-  // containers: Items
-  // containersIds: string[]
-
   activeContainerSpace: string
-  containersSpaces: Record<UniqueIdentifier, ContainerSpace>
+  containersSpaces: Record<string, ContainerSpace>
 }
 
 const initialState: tabSliceState = {
+  value: 0,
+  status: 'idle',
+
+  tabs: [],
+  tabGroups: [],
+  tabsMap: {},
+  tabIds: [],
+  windows: [],
+  context: {
+    windowId: -99,
+    tabId: -99,
+  },
+
   activeContainerSpace: 'tabs',
 
   containersSpaces: {
     tabs: {
       id: 'tabs',
       name: 'tabs',
-      pinTabs: [],
+
       containers: {
-        tabs: [],
-        pinTabs: createRange(1, index => `P${index + 1}`),
+        // tabs: [],
+        // pinTabs: createRange(1, index => `P${index + 1}`),
       },
     },
     base: {
       id: 'base',
       name: 'BASE',
-      pinTabs: ['A1', 'A2', 'A3', 'A4', 'A5'],
-      containers: {},
+      containers: {
+        // tabs: [],
+        // pinTabs: [],
+      },
     },
-    work: {
-      id: 'work',
-      name: 'WORK',
-      pinTabs: ['B1', 'B2', 'B3', 'B4', 'B5'],
-      containers: {},
-    },
-    youtube: {
-      id: 'youtube',
-      name: 'YOUTUBE',
-      pinTabs: ['C1', 'C2', 'C3', 'C4', 'C5'],
-      containers: {},
-    },
-    personal: {
-      id: 'personal',
-      name: 'PERSONAL',
-      pinTabs: ['D1', 'D2', 'D3', 'D4', 'D5'],
-      containers: {},
-    },
-    content: {
-      id: 'content',
-      name: 'CONTENT',
-      pinTabs: ['P1', 'P2', 'P3', 'P4', 'P5'],
-      containers: {},
-    },
+    // work: {
+    //   id: 'work',
+    //   name: 'WORK',
+    //   containers: {
+    //     tabs: [],
+    //     pinTabs: [],
+    //   },
+    // },
   },
-
-  value: 0,
-  status: 'idle',
-
-  tabGroups: [],
-
-  tabs: [],
-  tabsMap: {},
-  tabIds: [],
-
-  windows: [],
-
-  context: {
-    windowId: -99,
-    tabId: -99,
-  },
-
-  // containers: {
-  //   A: createRange(10, index => `A${index + 1}`),
-  //   B: createRange(10, index => `B${index + 1}`),
-  //   C: createRange(10, index => `C${index + 1}`),
-  //   D: createRange(10, index => `D${index + 1}`),
-  //   tabs: [],
-  //   pinTabs: createRange(1, index => `P${index + 1}`),
-  // },
-
-  // containersIds: ['A', 'B', 'C', 'D', 'tabs', 'pinTabs'],
 }
 
 export const tabSlice = createAppSlice({
@@ -116,45 +86,36 @@ export const tabSlice = createAppSlice({
       async () => {
         const response = await chrome.tabs.query({})
         const tabs = formatTabs(response)
+
         const tabIds = tabs.map(o => o.id)
-        return { tabs, tabIds }
+        const tabsMap = tabs.reduce((acc: TabMap, tab: TabExtend) => {
+          acc[`${tab.id}`] = tab
+          return acc
+        }, {})
+
+        return { tabs, tabIds, tabsMap }
       },
       {
         pending: state => {
           state.status = 'loading'
         },
         fulfilled: (state, action) => {
-          const tabsMap: { [key: number]: TabExtend } = action.payload.tabs.reduce(
-            (acc: { [key: number]: TabExtend }, tab: TabExtend) => {
-              if (tab.id) {
-                acc[tab.id] = tab
-              }
-              return acc
-            },
-            {},
-          )
-
           state.status = 'idle'
 
           state.tabs = action.payload.tabs
-          state.tabsMap = tabsMap
           state.tabIds = action.payload.tabIds
+          state.tabsMap = action.payload.tabsMap
 
-          // state.containers = {
-          //   ...state.containers,
-          //   tabs: action.payload.tabIds,
+          // state.containersSpaces = {
+          //   ...state.containersSpaces,
+          //   [state.activeContainerSpace]: {
+          //     ...state.containersSpaces[state.activeContainerSpace],
+          //     containers: {
+          //       ...state.containersSpaces[state.activeContainerSpace].containers,
+          //       // tabs: action.payload.tabIds.map(o => o.toString()),
+          //     },
+          //   },
           // }
-
-          state.containersSpaces = {
-            ...state.containersSpaces,
-            [state.activeContainerSpace]: {
-              ...state.containersSpaces[state.activeContainerSpace],
-              containers: {
-                ...state.containersSpaces[state.activeContainerSpace].containers,
-                tabs: action.payload.tabIds,
-              },
-            },
-          }
         },
         rejected: state => {
           state.status = 'failed'
@@ -167,9 +128,19 @@ export const tabSlice = createAppSlice({
         const tab = formatTabs([action.payload.tab])[0]
         state.tabsMap[action.payload.tab.id] = tab
         state.tabs.push(tab)
-        // state.containers = {
-        //   ...state.containers,
-        //   tabs: [...state.containers.tabs, action.payload.tab.id],
+
+        // state.containersSpaces = {
+        //   ...state.containersSpaces,
+        //   [state.activeContainerSpace]: {
+        //     ...state.containersSpaces[state.activeContainerSpace],
+        //     containers: {
+        //       ...state.containersSpaces[state.activeContainerSpace].containers,
+        //       tabs: [
+        //         ...state.containersSpaces[state.activeContainerSpace].containers.tabs,
+        //         action.payload.tab.id.toString(),
+        //       ],
+        //     },
+        //   },
         // }
       }
     }),
@@ -209,9 +180,18 @@ export const tabSlice = createAppSlice({
 
       if (Number.isFinite(tabId) && state.tabsMap[tabId]) {
         delete state.tabsMap[tabId]
-        // state.containers = {
-        //   ...state.containers,
-        //   tabs: state.containers.tabs.filter(o => o !== tabId),
+
+        // state.containersSpaces = {
+        //   ...state.containersSpaces,
+        //   [state.activeContainerSpace]: {
+        //     ...state.containersSpaces[state.activeContainerSpace],
+        //     containers: {
+        //       ...state.containersSpaces[state.activeContainerSpace].containers,
+        //       tabs: state.containersSpaces[state.activeContainerSpace].containers.tabs.filter(
+        //         o => o != tabId.toString(),
+        //       ),
+        //     },
+        //   },
         // }
       }
     }),
@@ -367,6 +347,29 @@ export const tabSlice = createAppSlice({
       },
     ),
 
+    onActActiveContainerSpace: create.reducer((state, action: PayloadAction<{ activeContainerSpace: string }>) => {
+      state.activeContainerSpace = action.payload.activeContainerSpace
+    }),
+
+    updateItems: create.reducer((state, action: PayloadAction<{ id: string; items: string[] }>) => {
+      console.log('update items', action.payload)
+
+      if (action.payload.id === 'tabs') {
+        return
+      }
+
+      state.containersSpaces = {
+        ...state.containersSpaces,
+        [state.activeContainerSpace]: {
+          ...state.containersSpaces[state.activeContainerSpace],
+          containers: {
+            ...state.containersSpaces[state.activeContainerSpace].containers,
+            [action.payload.id]: action.payload.items,
+          },
+        },
+      }
+    }),
+
     onActPinTab: create.asyncThunk<boolean, { tabId: number | string }>(
       async (args, thunkApi) => {
         const tabs = thunkApi.getState() as RootState
@@ -389,28 +392,6 @@ export const tabSlice = createAppSlice({
         },
       },
     ),
-
-    updateItems: create.reducer((state, action: PayloadAction<{ id: UniqueIdentifier; items: UniqueIdentifier[] }>) => {
-      // state.containers[action.payload.id] = action.payload.items
-
-      state.containersSpaces = {
-        ...state.containersSpaces,
-        [state.activeContainerSpace]: {
-          ...state.containersSpaces[state.activeContainerSpace],
-          containers: {
-            ...state.containersSpaces[state.activeContainerSpace].containers,
-            [action.payload.id]: action.payload.items,
-          },
-        },
-      }
-
-      // const name = state.containers[action.payload.id]
-      // containerStorage.setContainer(action.payload.id, )
-    }),
-
-    onActActiveContainerSpace: create.reducer((state, action: PayloadAction<{ activeContainerSpace: string }>) => {
-      state.activeContainerSpace = action.payload.activeContainerSpace
-    }),
   }),
   selectors: {
     selectCount: counter => counter.value,

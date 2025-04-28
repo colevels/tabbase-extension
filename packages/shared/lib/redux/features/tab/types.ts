@@ -1,10 +1,11 @@
-export type UniqueIdentifier = string | number
+import { TabExtend } from '../../../utils/index.js'
 
-export type Items = Record<UniqueIdentifier, UniqueIdentifier[]>
+export type Items = Record<string, string[]>
 
 export type ContainerSpace = {
   id: string
   name: string
-  pinTabs: string[] | number[]
   containers: Items
 }
+
+export type TabMap = Record<string, TabExtend>

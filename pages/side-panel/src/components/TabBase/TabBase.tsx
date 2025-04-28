@@ -23,7 +23,6 @@ import {
 } from '@dnd-kit/core'
 import { SortableContext, arrayMove, verticalListSortingStrategy, rectSortingStrategy } from '@dnd-kit/sortable'
 
-import SortableItem from './SortableItem'
 import SortableItemCustom from './SortableItemCustom'
 import DroppableContainer from './DroppableContainer'
 import DroppableContainerGrid from './DroppableContainerGrid'
@@ -58,7 +57,7 @@ interface Props {
     index: number
     overIndex: number
     isDragging: boolean
-    containerId: UniqueIdentifier
+    containerId: string
     isSorting: boolean
     isDragOverlay: boolean
     background?: string
@@ -83,9 +82,9 @@ export function MultipleContainers({
   console.log('containers', containers)
   console.log('tabsMap', tabsMap)
   const containerId = 'tabs'
-  const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
+  const [activeId, setActiveId] = useState<string | null>(null)
 
-  const lastOverId = useRef<UniqueIdentifier | null>(null)
+  const lastOverId = useRef<string | null>(null)
   const recentlyMovedToNewContainer = useRef(false)
   // const isSortingContainer = activeId != null ? containers.includes(activeId) : false
 
@@ -127,13 +126,13 @@ export function MultipleContainers({
             overId = closestCenter({
               ...args,
               droppableContainers: args.droppableContainers.filter(
-                container => container.id !== overId && containerItems.includes(container.id),
+                container => container.id !== overId && containerItems.includes(container.id.toString()),
               ),
             })[0]?.id
           }
         }
 
-        lastOverId.current = overId
+        lastOverId.current = overId.toString()
 
         return [{ id: overId }]
       }
@@ -154,15 +153,15 @@ export function MultipleContainers({
   const [clonedItems, setClonedItems] = useState<Items | null>(null)
   const sensors = useSensors(useSensor(MouseSensor))
 
-  const findContainer = (id: UniqueIdentifier) => {
+  const findContainer = (id: string) => {
     if (id in containers) {
       return id
     }
 
-    return Object.keys(containers).find(key => containers[key].includes(id))
+    return Object.keys(containers).find(key => containers[key].includes(id.toString()))
   }
 
-  const getIndex = (id: UniqueIdentifier) => {
+  const getIndex = (id: string) => {
     // console.log('get index', id)
     const container = findContainer(id)
 
@@ -170,7 +169,7 @@ export function MultipleContainers({
       return -1
     }
 
-    const index = containers[container].indexOf(id)
+    const index = containers[container].indexOf(id.toString())
 
     return index
   }
@@ -203,7 +202,7 @@ export function MultipleContainers({
         },
       }}
       onDragStart={({ active }) => {
-        setActiveId(active.id)
+        setActiveId(active.id.toString())
         setClonedItems(containers)
       }}
       onDragOver={({ active, over }) => {
@@ -215,8 +214,8 @@ export function MultipleContainers({
           return
         }
 
-        const overContainer = findContainer(overId)
-        const activeContainer = findContainer(active.id)
+        const overContainer = findContainer(overId.toString())
+        const activeContainer = findContainer(active.id.toString())
         console.log({ overContainer, activeContainer })
 
         if (!overContainer || !activeContainer) {
@@ -228,8 +227,8 @@ export function MultipleContainers({
 
           const activeItems = containers[activeContainer]
           const overItems = containers[overContainer]
-          const overIndex = overItems.indexOf(overId)
-          const activeIndex = activeItems.indexOf(active.id)
+          const overIndex = overItems.indexOf(overId.toString())
+          const activeIndex = activeItems.indexOf(active.id.toString())
 
           let newIndex: number
 
@@ -333,7 +332,7 @@ export function MultipleContainers({
           console.log('set containers')
         }
 
-        const activeContainer = findContainer(active.id)
+        const activeContainer = findContainer(active.id.toString())
 
         if (!activeContainer) {
           setActiveId(null)
@@ -357,11 +356,11 @@ export function MultipleContainers({
         //   return
         // }
 
-        const overContainer = findContainer(overId)
+        const overContainer = findContainer(overId.toString())
 
         if (overContainer) {
-          const activeIndex = containers[activeContainer].indexOf(active.id)
-          const overIndex = containers[overContainer].indexOf(overId)
+          const activeIndex = containers[activeContainer].indexOf(active.id.toString())
+          const overIndex = containers[overContainer].indexOf(overId.toString())
 
           if (activeIndex !== overIndex) {
             console.log('over container')
@@ -376,11 +375,7 @@ export function MultipleContainers({
       onDragCancel={onDragCancel}>
       <div>CONTAINER: PIN TABS</div>
       <div className={styles.TabBaseContainer}>
-        <DroppableContainerGrid
-          key={'pinTabs'}
-          id={'pinTabs'}
-          // onRemove={() => handleRemove(containerId)}
-          items={containers['pinTabs']}>
+        <DroppableContainerGrid key={'pinTabs'} id={'pinTabs'} items={containers['pinTabs']}>
           <SortableContext items={containers['pinTabs']} strategy={rectSortingStrategy}>
             {containers['pinTabs'].map((value, index) => {
               return (
@@ -401,45 +396,11 @@ export function MultipleContainers({
         </DroppableContainerGrid>
       </div>
 
-      {/* <div className={styles.TabBaseContainer}>
-        <div style={{ padding: '0px 20px 0px 20px' }}>
-          <div>SUGGEST</div>
-        </div>
-        <DroppableContainer
-          key={containerId}
-          id={containerId}
-          // onRemove={() => handleRemove(containerId)}
-          items={containers[containerId]}>
-          <SortableContext items={containers[containerId]} strategy={verticalListSortingStrategy}>
-            {containers[containerId].map((value, index) => {
-              return (
-                <SortableItemCustom
-                  tab={tabsMap[value]}
-                  key={value}
-                  id={value}
-                  index={index}
-                  handle={false}
-                  style={getItemStyles}
-                  wrapperStyle={wrapperStyle}
-                  containerId={containerId}
-                  getIndex={getIndex}
-                  // disabled={isSortingContainer}
-                />
-              )
-            })}
-          </SortableContext>
-        </DroppableContainer>
-      </div> */}
-
       <div className={styles.TabBaseContainer}>
         <div style={{ padding: '0px 20px 0px 20px' }}>
           <div>CONTAINER: TABS</div>
         </div>
-        <DroppableContainer
-          key={containerId}
-          id={containerId}
-          // onRemove={() => handleRemove(containerId)}
-          items={containers[containerId]}>
+        <DroppableContainer key={containerId} id={containerId} items={containers[containerId]}>
           <SortableContext items={containers[containerId]} strategy={verticalListSortingStrategy}>
             {containers[containerId].map((value, index) => {
               return (
@@ -470,14 +431,14 @@ export function MultipleContainers({
     </DndContext>
   )
 
-  function renderSortableItemDragOverlay(id: UniqueIdentifier) {
+  function renderSortableItemDragOverlay(id: string) {
     return (
       <Item
         value={id}
         style={getItemStyles({
-          containerId: findContainer(id) as UniqueIdentifier,
+          containerId: findContainer(id) as string,
           overIndex: -1,
-          index: getIndex(id),
+          index: getIndex(id.toString()),
           background: 'red',
           value: id,
           isSorting: true,
