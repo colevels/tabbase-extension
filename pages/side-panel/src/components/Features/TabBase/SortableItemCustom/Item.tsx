@@ -105,7 +105,7 @@ export const Item = React.memo(
               {...(!handle ? listeners : undefined)}
               {...props}
               tabIndex={!handle ? 0 : undefined}>
-              {value}
+              {value} CUSTOM
             </div>
           </div>
         </li>

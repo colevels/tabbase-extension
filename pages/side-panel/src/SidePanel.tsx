@@ -4,7 +4,7 @@ import { withErrorBoundary, withSuspense } from '@extension/shared'
 import Header from './components/Section/Header'
 import ChromeEventProvider from './components/ChromeEventProvider'
 import Tabs from './components/Common/Tabs'
-import TabBase from './components/TabBase'
+import TabBase from './components/Features/TabBase'
 
 const SidePanel = () => {
   return (

@@ -128,6 +128,7 @@ export const tabSlice = createAppSlice({
         const tab = formatTabs([action.payload.tab])[0]
         state.tabsMap[action.payload.tab.id] = tab
         state.tabs.push(tab)
+        state.tabIds.push(action.payload.tab.id)
 
         // state.containersSpaces = {
         //   ...state.containersSpaces,

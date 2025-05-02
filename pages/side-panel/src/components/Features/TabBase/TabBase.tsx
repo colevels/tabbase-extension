@@ -24,7 +24,7 @@ import {
 import { SortableContext, arrayMove, verticalListSortingStrategy, rectSortingStrategy } from '@dnd-kit/sortable'
 
 import SortableItemCustom from './SortableItemCustom'
-import DroppableContainer from './DroppableContainer'
+import DroppableContainer from './DroppableContainerGrid/DroppableContainer'
 import DroppableContainerGrid from './DroppableContainerGrid'
 
 import { Item } from './SortableItem/Item'

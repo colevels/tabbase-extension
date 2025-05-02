@@ -4,7 +4,7 @@ import { Item } from './Item'
 
 import type React from 'react'
 import type { UniqueIdentifier } from '@dnd-kit/core'
-import { TabExtend } from '@extension/shared'
+import type { TabExtend } from '@extension/shared'
 
 interface SortableItemProps {
   containerId: UniqueIdentifier

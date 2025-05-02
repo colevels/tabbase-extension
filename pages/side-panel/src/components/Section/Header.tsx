@@ -14,7 +14,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   const display = useAppSelector(selectContainersSpacesDisplay)
 
   return (
-    <div>
+    <div style={{ padding: '10px' }}>
       <Group>
         {display.spaces.map(item => (
           <Button

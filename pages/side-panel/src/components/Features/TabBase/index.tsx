@@ -1,5 +1,5 @@
 import React from 'react'
-import { MultipleContainers } from '@src/components/TabBase/TabBase'
+import { MultipleContainers } from './TabBase'
 
 const TabSpace = () => {
   return (

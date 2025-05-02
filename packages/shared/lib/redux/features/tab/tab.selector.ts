@@ -2,7 +2,7 @@
 import _ from 'lodash'
 import { createSelector } from '@reduxjs/toolkit'
 import type { RootState } from '../../store.js'
-import type { Items } from './types.js'
+import type { Containers } from './types.js'
 
 // Input selector: Access the `items` from the cart slice
 const selectTabs = (state: RootState) => state.tab.tabs
@@ -39,7 +39,7 @@ export const selectTabContainers = createSelector([selectTabsMap], tabsMap => {
 export const selectContainersSpacesDisplay = createSelector(
   [selectContainersSpaces, seelctActiveContainerSpace, selectTabsMap, selectTabIds],
   (containersSpaces, activeContainerSpace, tabsMap, tabIds) => {
-    let containers: Items = {}
+    let containers: Containers = {}
     console.log('containersSpaces', containersSpaces)
     console.log('activeContainerSpace', activeContainerSpace)
 
@@ -58,6 +58,8 @@ export const selectContainersSpacesDisplay = createSelector(
       containers = { ...containers, pinTabs: [] }
     }
 
+    console.log('test')
+
     if (!_.has(containers, 'tabs')) {
       const pinTabs = containers.pinTabs.map(o => o.toString())
       const tabIdsNotInPinTabs = _.difference(
@@ -65,6 +67,7 @@ export const selectContainersSpacesDisplay = createSelector(
         pinTabs,
       )
       containers = { ...containers, tabs: tabIdsNotInPinTabs.map(o => o.toString()) }
+      console.log('containers', containers)
     }
 
     return {
