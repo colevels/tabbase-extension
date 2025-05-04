@@ -1,13 +1,7 @@
 import type React from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import type {
-  CancelDrop,
-  CollisionDetection,
-  DropAnimation,
-  UniqueIdentifier,
-  KeyboardCoordinateGetter,
-} from '@dnd-kit/core'
+import type { CollisionDetection, DropAnimation } from '@dnd-kit/core'
 import {
   closestCenter,
   pointerWithin,
@@ -21,13 +15,12 @@ import {
   MouseSensor,
   MeasuringStrategy,
 } from '@dnd-kit/core'
-import { SortableContext, arrayMove, verticalListSortingStrategy, rectSortingStrategy } from '@dnd-kit/sortable'
+import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable'
 
 import SortableItemCustom from './SortableItemCustom'
 import DroppableContainer from './DroppableContainerGrid/DroppableContainer'
-import DroppableContainerGrid from './DroppableContainerGrid'
 
-import { Item } from './SortableItem/Item'
+import { Item } from './SortableItemCustom/Item'
 
 import styles from './TabBaseContainer.module.css'
 
@@ -45,48 +38,20 @@ const dropAnimation: DropAnimation = {
   }),
 }
 
-type Items = Record<UniqueIdentifier, UniqueIdentifier[]>
-
-interface Props {
-  adjustScale?: boolean
-  cancelDrop?: CancelDrop
-  containerStyle?: React.CSSProperties
-  coordinateGetter?: KeyboardCoordinateGetter
-  getItemStyles?(args: {
-    value: UniqueIdentifier
-    index: number
-    overIndex: number
-    isDragging: boolean
-    containerId: string
-    isSorting: boolean
-    isDragOverlay: boolean
-    background?: string
-  }): React.CSSProperties
-  wrapperStyle?(args: { index: number }): React.CSSProperties
-  itemCount?: number
-  items?: Items
-  handle?: boolean
-  scrollable?: boolean
-}
-
 export const TRASH_ID = 'void'
 
-export function MultipleContainers({
-  adjustScale = false,
-  getItemStyles = () => ({}),
-  wrapperStyle = () => ({}),
-}: Props) {
+const MultipleContainers: React.FC = () => {
   const dispatch = useAppDispatch()
 
   const { containers, tabsMap } = useAppSelector(selectContainersSpacesDisplay)
-  console.log('containers', containers)
-  console.log('tabsMap', tabsMap)
+
   const containerId = 'tabs'
   const [activeId, setActiveId] = useState<string | null>(null)
 
+  const sensors = useSensors(useSensor(MouseSensor))
+
   const lastOverId = useRef<string | null>(null)
   const recentlyMovedToNewContainer = useRef(false)
-  // const isSortingContainer = activeId != null ? containers.includes(activeId) : false
 
   /**
    * Custom collision detection strategy optimized for multiple containers
@@ -150,8 +115,6 @@ export function MultipleContainers({
     },
     [activeId, containers],
   )
-  const [clonedItems, setClonedItems] = useState<Items | null>(null)
-  const sensors = useSensors(useSensor(MouseSensor))
 
   const findContainer = (id: string) => {
     if (id in containers) {
@@ -159,31 +122,6 @@ export function MultipleContainers({
     }
 
     return Object.keys(containers).find(key => containers[key].includes(id.toString()))
-  }
-
-  const getIndex = (id: string) => {
-    // console.log('get index', id)
-    const container = findContainer(id)
-
-    if (!container) {
-      return -1
-    }
-
-    const index = containers[container].indexOf(id.toString())
-
-    return index
-  }
-
-  const onDragCancel = () => {
-    if (clonedItems) {
-      // Reset items to their original state in case items have been
-      // Dragged across containers
-      // setItems(clonedItems)
-      console.log('on drag cancel')
-    }
-
-    setActiveId(null)
-    setClonedItems(null)
   }
 
   useEffect(() => {
@@ -203,7 +141,6 @@ export function MultipleContainers({
       }}
       onDragStart={({ active }) => {
         setActiveId(active.id.toString())
-        setClonedItems(containers)
       }}
       onDragOver={({ active, over }) => {
         console.log('active and over: ', { active, over })
@@ -371,29 +308,18 @@ export function MultipleContainers({
         }
 
         setActiveId(null)
-      }}
-      onDragCancel={onDragCancel}>
-      <div>CONTAINER: PIN TABS</div>
+      }}>
       <div className={styles.TabBaseContainer}>
-        <DroppableContainerGrid key={'pinTabs'} id={'pinTabs'} items={containers['pinTabs']}>
-          <SortableContext items={containers['pinTabs']} strategy={rectSortingStrategy}>
+        <div style={{ padding: '0px 20px 0px 20px' }}>
+          <div>CONTAINER: TABS</div>
+        </div>
+        <DroppableContainer key={'pinTabs'} id={'pinTabs'} items={containers['pinTabs']}>
+          <SortableContext items={containers['pinTabs']} strategy={verticalListSortingStrategy}>
             {containers['pinTabs'].map((value, index) => {
-              return (
-                <SortableItemCustom
-                  tab={tabsMap[value]}
-                  key={value}
-                  id={value}
-                  index={index}
-                  handle={false}
-                  style={getItemStyles}
-                  wrapperStyle={wrapperStyle}
-                  containerId={'pinTabs'}
-                  getIndex={getIndex}
-                />
-              )
+              return <SortableItemCustom tab={tabsMap[value]} key={value} id={value} index={index} handle={false} />
             })}
           </SortableContext>
-        </DroppableContainerGrid>
+        </DroppableContainer>
       </div>
 
       <div className={styles.TabBaseContainer}>
@@ -403,27 +329,14 @@ export function MultipleContainers({
         <DroppableContainer key={containerId} id={containerId} items={containers[containerId]}>
           <SortableContext items={containers[containerId]} strategy={verticalListSortingStrategy}>
             {containers[containerId].map((value, index) => {
-              return (
-                <SortableItemCustom
-                  tab={tabsMap[value]}
-                  key={value}
-                  id={value}
-                  index={index}
-                  handle={false}
-                  style={getItemStyles}
-                  wrapperStyle={wrapperStyle}
-                  containerId={containerId}
-                  getIndex={getIndex}
-                  // disabled={isSortingContainer}
-                />
-              )
+              return <SortableItemCustom tab={tabsMap[value]} key={value} id={value} index={index} handle={false} />
             })}
           </SortableContext>
         </DroppableContainer>
       </div>
 
       {createPortal(
-        <DragOverlay adjustScale={adjustScale} dropAnimation={dropAnimation}>
+        <DragOverlay adjustScale={false} dropAnimation={dropAnimation}>
           {activeId ? renderSortableItemDragOverlay(activeId) : null}
         </DragOverlay>,
         document.body,
@@ -432,22 +345,8 @@ export function MultipleContainers({
   )
 
   function renderSortableItemDragOverlay(id: string) {
-    return (
-      <Item
-        value={id}
-        style={getItemStyles({
-          containerId: findContainer(id) as string,
-          overIndex: -1,
-          index: getIndex(id.toString()),
-          background: 'red',
-          value: id,
-          isSorting: true,
-          isDragging: true,
-          isDragOverlay: true,
-        })}
-        wrapperStyle={wrapperStyle({ index: 0 })}
-        dragOverlay
-      />
-    )
+    return <Item dragOverlay value={<div>{tabsMap[id].title || id}</div>} />
   }
 }
+
+export default MultipleContainers

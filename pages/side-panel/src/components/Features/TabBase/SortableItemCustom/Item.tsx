@@ -18,9 +18,8 @@ export interface Props {
   transform?: Transform | null
   listeners?: DraggableSyntheticListeners
   sorting?: boolean
-  style?: React.CSSProperties
+  // style?: React.CSSProperties
   transition?: string | null
-  wrapperStyle?: React.CSSProperties
   value: React.ReactNode
   onRemove?(): void
 }
@@ -40,11 +39,10 @@ export const Item = React.memo(
         index,
         listeners,
         sorting,
-        style,
+        // style,
         transition,
         transform,
         value,
-        wrapperStyle,
         ...props
       },
       ref,
@@ -71,14 +69,12 @@ export const Item = React.memo(
           )}
           style={
             {
-              // ...wrapperStyle,
               transition: [transition].filter(Boolean).join(', '),
               '--translate-x': transform ? `${Math.round(transform.x)}px` : undefined,
               '--translate-y': transform ? `${Math.round(transform.y)}px` : undefined,
               '--scale-x': transform?.scaleX ? `${transform.scaleX}` : undefined,
               '--scale-y': transform?.scaleY ? `${transform.scaleY}` : undefined,
               '--index': index,
-              '--color': 'red',
             } as React.CSSProperties
           }
           ref={ref}>
@@ -89,8 +85,10 @@ export const Item = React.memo(
               justifyContent: 'space-between',
               width: '100%',
             }}>
-            <div>
-              <span className={styles.Actions}>{handle ? <Handle {...handleProps} {...listeners} /> : null}</span>
+            <div style={{ opacity: dragOverlay ? 1 : 1 }}>
+              <span className={styles.Actions}>
+                <Handle {...handleProps} {...listeners} />
+              </span>
             </div>
             <div
               className={classNames(
@@ -101,11 +99,11 @@ export const Item = React.memo(
                 disabled && styles.disabled,
                 color && styles.color,
               )}
-              style={{ ...style, width: '100%' }}
-              {...(!handle ? listeners : undefined)}
+              style={{ width: '100%' }}
               {...props}
-              tabIndex={!handle ? 0 : undefined}>
-              {value} CUSTOM
+              // {...(!handle ? listeners : undefined)}
+              tabIndex={handle ? undefined : 0}>
+              {value}
             </div>
           </div>
         </li>

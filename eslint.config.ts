@@ -52,7 +52,7 @@ export default ts.config(
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/consistent-type-imports': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': 'warn',
       'import-x/no-unresolved': 'off',
       'import-x/no-named-as-default-member': 'off',
       'react/react-in-jsx-scope': 'off',
