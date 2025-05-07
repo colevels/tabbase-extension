@@ -6,7 +6,7 @@ import { Handle } from '../Handle/Handle'
 import styles from './Item.module.scss'
 
 import Test from '../../../Common/Test'
-import Tab from '../../../Common/Tab'
+import Tab from '../Tab'
 
 export interface Props {
   dragOverlay?: boolean
