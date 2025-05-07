@@ -24,7 +24,8 @@ function SortableItem({ disabled, id, index, handle, tab }: SortableItemProps) {
     <Item
       handle={handle}
       index={index}
-      value={<div>{tab ? `${tab.title} : ${id}` : id}</div>}
+      // value={<div style={{ fontSize: 20 }} >{tab ? `${tab.title} : ${id}` : id}</div>}
+      value={tab ? tab.title : id}
       ref={disabled ? undefined : setNodeRef}
       handleProps={handle ? { ref: setActivatorNodeRef } : undefined}
       dragging={isDragging}

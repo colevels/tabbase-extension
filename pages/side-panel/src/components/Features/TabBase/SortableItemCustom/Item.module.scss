@@ -37,11 +37,10 @@ $focused-outline-color: #4c9ffe;
     scaleY(var(--scale-y, 1));
   transform-origin: 0 0;
   touch-action: manipulation;
-  // background-color: #0052ff;
 
-  &.sorting {
-    background-color: #0052ff;
-  }
+  // &.sorting {
+  //   background-color: #0052ff;
+  // }
 
   &.fadeIn {
     animation: fadeIn 500ms ease;
@@ -56,12 +55,28 @@ $focused-outline-color: #4c9ffe;
   }
 }
 
+.title {
+  font-size: 13px;
+  line-height: 24px;
+  // color: ${(props) => (props.active ? '#000000' : '#333')};
+  // font-weight: ${(props) => (props.active ? '500' : '500')};
+  user-select: none;
+  padding-right: 2px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+
+}
+
 .Item {
   position: relative;
   display: flex;
   flex-grow: 1;
   align-items: center;
-  padding: 18px 20px;
+  justify-content: space-between;
+  padding: 10px 20px;
   background-color: $background-color;
   box-shadow: $box-shadow;
   outline: none;
@@ -142,15 +157,21 @@ $focused-outline-color: #4c9ffe;
   }
 }
 
-.Remove {
-  visibility: hidden;
+.ActionsContainer {
+  margin-right: 10px;
+
+  &.dragOverlay {
+    opacity: 0.5;
+  }
 }
 
 .Actions {
   display: flex;
   align-self: flex-start;
-  margin-top: -12px;
-  // margin-left: auto;
-  margin-bottom: -15px;
-  // margin-right: -10px;
+  // margin-top: -12px;
+  // margin-bottom: -15px;
 }
+
+// .Remove {
+//   visibility: hidden;
+// }

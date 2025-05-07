@@ -5,6 +5,9 @@ import type { Transform } from '@dnd-kit/utilities'
 import { Handle } from '../Handle/Handle'
 import styles from './Item.module.scss'
 
+import Test from '../../../Common/Test'
+import Tab from '../../../Common/Tab'
+
 export interface Props {
   dragOverlay?: boolean
   color?: string
@@ -81,16 +84,18 @@ export const Item = React.memo(
           <div
             style={{
               display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
+              // alignItems: 'center',
+              // justifyContent: 'space-between',
               width: '100%',
             }}>
-            <div style={{ opacity: dragOverlay ? 1 : 1 }}>
+            <div className={classNames(styles.ActionsContainer, dragOverlay && styles.dragOverlay)}>
               <span className={styles.Actions}>
                 <Handle {...handleProps} {...listeners} />
               </span>
             </div>
-            <div
+            <Tab title={value} onSelect={() => {}} onClose={() => {}} />
+
+            {/* <div
               className={classNames(
                 styles.Item,
                 dragging && styles.dragging,
@@ -103,8 +108,12 @@ export const Item = React.memo(
               {...props}
               // {...(!handle ? listeners : undefined)}
               tabIndex={handle ? undefined : 0}>
-              {value}
-            </div>
+              <div className={styles.title}>{value}</div>
+              <Test />
+              <div>
+                <div>Close Tab</div>
+              </div>
+            </div> */}
           </div>
         </li>
       )
