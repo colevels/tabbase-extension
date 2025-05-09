@@ -4,8 +4,8 @@ import type { AnimateLayoutChanges } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { defaultAnimateLayoutChanges, useSortable } from '@dnd-kit/sortable'
 
-import { Container } from '../Container/Container'
-import type { Props as ContainerProps } from '../Container/Container'
+import { Container } from './Container'
+import type { Props as ContainerProps } from './Container'
 
 const animateLayoutChanges: AnimateLayoutChanges = args => defaultAnimateLayoutChanges({ ...args, wasDragging: true })
 
