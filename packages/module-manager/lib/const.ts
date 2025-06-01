@@ -11,6 +11,7 @@ export const DEFAULT_CHOICES = [
   { name: 'Popup (On Extension Icon Click)', value: 'popup' },
   { name: 'DevTools (Include DevTools Panel)', value: 'devtools' },
   { name: 'Side Panel', value: 'side-panel' },
+  { name: 'Tabbase Panel', value: 'tabbase-panel' },
   { name: 'Options Page', value: 'options' },
   { name: 'All tests', value: 'tests' },
 ] as const;
@@ -22,6 +23,7 @@ export const HELP_EXAMPLES = [
   ['--de content devtools', 'Delete everything exclude content and devtools'],
   ['-r options side-panel', 'Recover options and side-panel'],
   ['--re popup new-tab', 'Recover everything exclude popup and new-tab'],
+  ['-r options tabbase-panel', 'Recover options and tabbase-panel'],
 ] as const;
 
 export const CLI_OPTIONS = [
@@ -86,7 +88,7 @@ export const MODULE_CONFIG = {
   },
   'side-panel': {
     side_panel: {
-      default_path: 'side-panel/index.html',
+      default_path: 'tabbase-panel/index.html',
     },
     permissions: ['sidePanel'],
   },

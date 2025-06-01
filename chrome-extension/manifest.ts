@@ -77,7 +77,7 @@ const manifest = {
     },
   ],
   side_panel: {
-    default_path: 'side-panel/index.html',
+    default_path: 'tabbase-panel/index.html',
   },
 } satisfies ManifestType;
 
