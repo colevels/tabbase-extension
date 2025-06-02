@@ -50,6 +50,14 @@ const initialState: tabSliceState = {
   activeContainerSpace: 'tabs',
 
   containersSpaces: {
+    base: {
+      id: 'base',
+      name: 'BASE',
+      containers: {
+        // tabs: [],
+        // pinTabs: [],
+      },
+    },
     tabs: {
       id: 'tabs',
       name: 'tabs',
@@ -59,22 +67,6 @@ const initialState: tabSliceState = {
         // pinTabs: createRange(1, index => `P${index + 1}`),
       },
     },
-    base: {
-      id: 'base',
-      name: 'BASE',
-      containers: {
-        // tabs: [],
-        // pinTabs: [],
-      },
-    },
-    // work: {
-    //   id: 'work',
-    //   name: 'WORK',
-    //   containers: {
-    //     tabs: [],
-    //     pinTabs: [],
-    //   },
-    // },
   },
 }
 

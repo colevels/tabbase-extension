@@ -75,8 +75,8 @@ export const Item = React.memo(
               transition: [transition].filter(Boolean).join(', '),
               '--translate-x': transform ? `${Math.round(transform.x)}px` : undefined,
               '--translate-y': transform ? `${Math.round(transform.y)}px` : undefined,
-              '--scale-x': transform?.scaleX ? `${transform.scaleX}` : undefined,
-              '--scale-y': transform?.scaleY ? `${transform.scaleY}` : undefined,
+              // '--scale-x': transform?.scaleX ? `${transform.scaleX}` : undefined,
+              // '--scale-y': transform?.scaleY ? `${transform.scaleY}` : undefined,
               '--index': index,
             } as React.CSSProperties
           }
@@ -94,26 +94,6 @@ export const Item = React.memo(
               </span>
             </div>
             <Tab title={value} onSelect={() => {}} onClose={() => {}} />
-
-            {/* <div
-              className={classNames(
-                styles.Item,
-                dragging && styles.dragging,
-                handle && styles.withHandle,
-                dragOverlay && styles.dragOverlay,
-                disabled && styles.disabled,
-                color && styles.color,
-              )}
-              style={{ width: '100%' }}
-              {...props}
-              // {...(!handle ? listeners : undefined)}
-              tabIndex={handle ? undefined : 0}>
-              <div className={styles.title}>{value}</div>
-              <Test />
-              <div>
-                <div>Close Tab</div>
-              </div>
-            </div> */}
           </div>
         </li>
       )

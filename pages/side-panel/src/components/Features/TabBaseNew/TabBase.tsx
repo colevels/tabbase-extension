@@ -18,7 +18,7 @@ import {
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable'
 
 import SortableItemCustom from './SortableItemCustom'
-import DroppableContainer from './DroppableContainerGrid/DroppableContainer'
+import DroppableContainer from './DroppableContainerGrid/index'
 
 import { Item } from './SortableItemCustom/Item'
 
@@ -309,6 +309,7 @@ const MultipleContainers: React.FC = () => {
 
         setActiveId(null)
       }}>
+      <div style={{ padding: '0px 20px 0px 20px' }}>V2</div>
       <div className={styles.TabBaseContainer}>
         <div style={{ padding: '0px 20px 0px 20px' }}>
           <div>CONTAINER: TABS</div>
@@ -324,7 +325,7 @@ const MultipleContainers: React.FC = () => {
 
       <div className={styles.TabBaseContainer}>
         <div style={{ padding: '0px 20px 0px 20px' }}>
-          <div>CONTAINER: TABS</div>
+          <div>CONTAINER: TABS CANT SORT</div>
         </div>
         <DroppableContainer key={containerId} id={containerId} items={containers[containerId]}>
           <SortableContext items={containers[containerId]} strategy={verticalListSortingStrategy}>
