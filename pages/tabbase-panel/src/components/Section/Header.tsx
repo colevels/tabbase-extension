@@ -1,32 +1,34 @@
-import { useAppDispatch, useAppSelector } from '@extension/tabbase-shared'
-import { selectContainersSpacesDisplay } from '@extension/tabbase-shared/lib/redux/features/tab/tab.selector'
-import { onActActiveContainerSpace } from '@extension/tabbase-shared/lib/redux/features/tab/tab.slice'
-import { Button, Group } from '@mantine/core'
+import { Box } from '@mantine/core'
 import type React from 'react'
 
+import ScrollContent from '../Features/Scroll'
+
 interface HeaderProps {
-  title: string
+  title?: string
 }
 
 const Header: React.FC<HeaderProps> = ({ title }) => {
-  const dispatch = useAppDispatch()
-
-  const display = useAppSelector(selectContainersSpacesDisplay)
-
   return (
     <div style={{ padding: '10px' }}>
-      <Group>
-        {display.spaces.map(item => (
-          <Button
-            onClick={() => {
-              dispatch(onActActiveContainerSpace({ activeContainerSpace: item.id }))
-            }}
-            variant={item.active ? 'filled' : 'light'}
-            key={item.id}>
-            {item.name}
-          </Button>
-        ))}
-      </Group>
+      <Box px={10} mb={6} mt={8}>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div style={{ width: 'calc(100% - 80px)', height: '100%' }}>
+            <ScrollContent
+              tabFilters={[
+                { id: 'new-tab-filter-1', name: '+ New Tab Filter', tabs: [], keywords: [], websites: [] },
+                { id: 'new-tab-filter-2', name: '+ New Tab Filter', tabs: [], keywords: [], websites: [] },
+                { id: 'new-tab-filter-3', name: '+ New Tab Filter', tabs: [], keywords: [], websites: [] },
+                { id: 'new-tab-filter-4', name: '+ New Tab Filter', tabs: [], keywords: [], websites: [] },
+                { id: 'new-tab-filter-5', name: '+ New Tab Filter', tabs: [], keywords: [], websites: [] },
+                { id: 'new-tab-filter-6', name: '+ New Tab Filter', tabs: [], keywords: [], websites: [] },
+                { id: 'new-tab-filter-7', name: '+ New Tab Filter', tabs: [], keywords: [], websites: [] },
+                { id: 'new-tab-filter-8', name: '+ New Tab Filter', tabs: [], keywords: [], websites: [] },
+                { id: 'new-tab-filter-9', name: '+ New Tab Filter', tabs: [], keywords: [], websites: [] },
+              ]}
+            />
+          </div>
+        </div>
+      </Box>
     </div>
   )
 }

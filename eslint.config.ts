@@ -53,6 +53,7 @@ export default config(
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
       'prefer-const': 'error',
+      'arrow-body-style': ['off'],
       'no-var': 'error',
       'func-style': ['error', 'expression', { allowArrowFunctions: true }],
       'no-restricted-imports': [
@@ -62,9 +63,9 @@ export default config(
           message: 'Please import from `@extension/shared` instead of `type-fest`.',
         },
       ],
-      'arrow-body-style': ['error', 'as-needed'],
       '@typescript-eslint/consistent-type-imports': 'error',
       '@typescript-eslint/consistent-type-exports': 'error',
+      '@typescript-eslint/no-explicit-any': 'off',
       // 'import-x/order': [
       //   'error',
       //   {
@@ -83,7 +84,7 @@ export default config(
       // ],
       'import-x/no-unresolved': 'off',
       'import-x/no-named-as-default': 'error',
-      'import-x/no-named-as-default-member': 'error',
+      'import-x/no-named-as-default-member': 'off',
       'import-x/newline-after-import': 'error',
       'import-x/no-deprecated': 'error',
       'import-x/no-duplicates': ['error', { considerQueryString: true, 'prefer-inline': false }],
