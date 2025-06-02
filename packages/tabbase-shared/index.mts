@@ -1,3 +1,5 @@
 export * from './lib/hooks/index.js'
 export * from './lib/utils/index.js'
+export * from './lib/redux/store.js'
 export * from './const.js'
+export { selectTabsList } from './lib//redux/features/tab/tab.selector.js'

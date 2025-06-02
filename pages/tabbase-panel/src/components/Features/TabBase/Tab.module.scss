@@ -1,0 +1,55 @@
+.Tab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 6px 6px 6px 8px;
+  border-radius: 10px;
+  border-style: solid;
+  border-color: #e7e7e7;
+  opacity: 1;
+
+  margin-bottom: 0px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 1px solid #e7e7e7;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  height: 24px;
+  min-height: 24px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  .containerTitle {
+  }
+
+  transform: scale(1);
+  transition-duration: 0.1s;
+
+  :active {
+    transform: scale(1);
+    transition-duration: 0.1s;
+  }
+
+  :hover {
+    background-color: #fff;
+
+    .action {
+      display: flex !important;
+    }
+
+    .title {
+      color: #000000;
+    }
+
+    .containerTitle {
+      width: calc(100% - 26px - 26px - 20px) !important;
+    }
+  }
+
+  :last-child {
+    margin-bottom: 0px;
+  }
+}

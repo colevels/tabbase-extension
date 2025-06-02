@@ -627,6 +627,12 @@ importers:
       '@extension/storage':
         specifier: workspace:*
         version: link:../../packages/storage
+      '@extension/tabbase-shared':
+        specifier: workspace:*
+        version: link:../../packages/tabbase-shared
+      '@extension/tabbase-storage':
+        specifier: workspace:*
+        version: link:../../packages/tabbase-storage
       '@extension/ui':
         specifier: workspace:*
         version: link:../../packages/ui

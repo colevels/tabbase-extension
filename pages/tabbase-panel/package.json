@@ -27,6 +27,8 @@
     "@extension/i18n": "workspace:*",
     "@extension/shared": "workspace:*",
     "@extension/storage": "workspace:*",
+    "@extension/tabbase-shared": "workspace:*",
+    "@extension/tabbase-storage": "workspace:*",
     "@extension/ui": "workspace:*",
     "@mantine/core": "^7.17.4",
     "@mantine/hooks": "^7.17.4",
