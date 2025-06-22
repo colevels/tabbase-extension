@@ -17,7 +17,7 @@ import {
 } from '@dnd-kit/core'
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useAppSelector, useAppDispatch } from '@extension/tabbase-shared'
-import { selectContainersSpacesDisplay } from '@extension/tabbase-shared/lib/redux/features/tab/tab.selector'
+import { selectSpace } from '@extension/tabbase-shared/lib/redux/features/tab/tab.selector'
 import { onActPinTab, updateItems } from '@extension/tabbase-shared/lib/redux/features/tab/tab.slice'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -34,12 +34,12 @@ const dropAnimation: DropAnimation = {
   }),
 }
 
-export const TRASH_ID = 'void'
+const TRASH_ID = 'void'
 
 const MultipleContainers: React.FC = () => {
   const dispatch = useAppDispatch()
 
-  const { containers, tabsMap } = useAppSelector(selectContainersSpacesDisplay)
+  const { containers, tabsMap } = useAppSelector(selectSpace)
 
   const containerId = 'tabs'
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -120,6 +120,10 @@ const MultipleContainers: React.FC = () => {
     return Object.keys(containers).find(key => containers[key].includes(id.toString()))
   }
 
+  const renderSortableItemDragOverlay = (id: string) => {
+    return <Item dragOverlay value={<div>{tabsMap[id].title || id}</div>} />
+  }
+
   useEffect(() => {
     requestAnimationFrame(() => {
       recentlyMovedToNewContainer.current = false
@@ -184,9 +188,6 @@ const MultipleContainers: React.FC = () => {
             activeContainer,
             overContainer,
           })
-
-          // const pinTabIndex = _.findIndex([activeContainer, overContainer])
-          // console.log('pinTabIndex', pinTabIndex)
 
           if (activeContainer === 'pinTabs' && overContainer !== 'pinTabs') {
             const tabId = containers[activeContainer][activeIndex]
@@ -305,10 +306,9 @@ const MultipleContainers: React.FC = () => {
 
         setActiveId(null)
       }}>
-      <div style={{ padding: '0px 20px 0px 20px' }}>V2</div>
-      <div className={styles.TabBaseContainer}>
+      <div style={{ display: 'block' }}>
         <div style={{ padding: '0px 20px 0px 20px' }}>
-          <div>CONTAINER: TABS</div>
+          <div>['pinTabs'] CONTAINER: TABS</div>
         </div>
         <DroppableContainer key={'pinTabs'} id={'pinTabs'} items={containers['pinTabs']}>
           <SortableContext items={containers['pinTabs']} strategy={verticalListSortingStrategy}>
@@ -319,9 +319,9 @@ const MultipleContainers: React.FC = () => {
         </DroppableContainer>
       </div>
 
-      <div className={styles.TabBaseContainer}>
+      <div style={{ display: 'block' }}>
         <div style={{ padding: '0px 20px 0px 20px' }}>
-          <div>CONTAINER: TABS CANT SORT</div>
+          <div>['tabs'] CONTAINER: TABS CANT SORT</div>
         </div>
         <DroppableContainer key={containerId} id={containerId} items={containers[containerId]}>
           <SortableContext items={containers[containerId]} strategy={verticalListSortingStrategy}>
@@ -340,10 +340,6 @@ const MultipleContainers: React.FC = () => {
       )}
     </DndContext>
   )
-
-  function renderSortableItemDragOverlay(id: string) {
-    return <Item dragOverlay value={<div>{tabsMap[id].title || id}</div>} />
-  }
 }
 
 export default MultipleContainers

@@ -7,23 +7,18 @@ import './index.css'
 import { Box, Text } from '@mantine/core'
 import { LeftArrow, RightArrow } from './Arrows'
 
-// import { TabFilter } from '../../../../type'
-
-type scrollVisibilityApiType = React.ContextType<typeof VisibilityContext>
+type ScrollVisibilityApiType = React.ContextType<typeof VisibilityContext>
 
 type Props = {
-  tabFilters: any[]
-  // onSelectTabFilter: (tabFilter: TabFilter) => void
-  // onNewTabFilter: () => void
-  // activeTabFeedId: string | null
+  items: any[]
+  onClick?: (id: string) => void
+  activeId?: string
 }
 
 const ScrollContent: React.FC<Props> = props => {
-  const apiRef = React.useRef({} as scrollVisibilityApiType)
+  const apiRef = React.useRef({} as ScrollVisibilityApiType)
 
-  console.log('props.', props)
-
-  const onWheel = (apiObj: scrollVisibilityApiType, ev: React.WheelEvent) => {
+  const onWheel = (apiObj: ScrollVisibilityApiType, ev: React.WheelEvent) => {
     const isThouchpad = Math.abs(ev.deltaX) !== 0 || Math.abs(ev.deltaY) < 15
 
     if (isThouchpad) {
@@ -41,16 +36,28 @@ const ScrollContent: React.FC<Props> = props => {
   return (
     <div style={{ position: 'relative', padding: '0px' }}>
       <ScrollMenu LeftArrow={LeftArrow} RightArrow={RightArrow} onWheel={onWheel} apiRef={apiRef}>
-        {props.tabFilters.map(tabFilter => (
+        {props.items.map(o => (
           <Box
             px={8}
             py={5}
             mr={4}
-            bg={'#ebebeb'}
+            h={'40px'}
+            style={{
+              cursor: 'pointer',
+              display: 'inline-block',
+              position: 'relative',
+              borderRadius: '8px',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+            bg={props.activeId === o.id ? '#a5a5a5' : '#ebebeb'}
             onClick={() => {
-              // props.onClick()
+              if (props.onClick) {
+                props.onClick(o.id)
+              }
             }}>
-            <Text className="title">{tabFilter.id}</Text>
+            <Text className="title">{o.id}</Text>
           </Box>
         ))}
       </ScrollMenu>

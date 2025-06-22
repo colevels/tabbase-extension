@@ -18,7 +18,7 @@ type Props = {
   children: React.ReactNode
 }
 
-const ChromeEventProvider: React.FC<Props> = props => {
+const ChromeContainer: React.FC<Props> = props => {
   const dispatch = useAppDispatch()
 
   useEffect(() => {
@@ -129,4 +129,4 @@ const ChromeEventProvider: React.FC<Props> = props => {
   return <div>{props.children}</div>
 }
 
-export default ChromeEventProvider
+export default ChromeContainer

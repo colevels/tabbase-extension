@@ -30,7 +30,7 @@ import styles from '../TabBaseContainer.module.css'
 
 import { useAppSelector, useAppDispatch } from '@extension/shared'
 import { onActPinTab, updateItems } from '@extension/shared/lib/redux/features/tab/tab.slice'
-import { selectContainersSpacesDisplay } from '@extension/shared/lib/redux/features/tab/tab.selector'
+import { selectSpace } from '@extension/shared/lib/redux/features/tab/tab.selector'
 
 type Props = {
   containers: Record<string, UniqueIdentifier[]>

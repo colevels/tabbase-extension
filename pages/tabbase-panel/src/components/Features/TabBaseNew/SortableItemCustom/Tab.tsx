@@ -314,7 +314,7 @@ export const Tab = React.memo(
               <Handle {...handleProps} {...listeners} />
             </span>
           </div>
-          <StyledStack gap={5} mb={5}>
+          <StyledStack style={{ flexGrow: 1, overflow: 'hidden' }} gap={5} mb={5}>
             <Indicator disabled position="top-start" offset={2}>
               <StyledTab
                 // discarded={props.tab.discarded}

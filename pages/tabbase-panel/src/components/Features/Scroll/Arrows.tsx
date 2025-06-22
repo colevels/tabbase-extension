@@ -15,7 +15,7 @@ const BaseArrow = styled.button`
   align-items: center;
   opacity: ${props => (props.disabled ? 0 : 1)};
   user-select: 'none';
-  height: 28px;
+  height: 40px;
   border: none;
   pointer-events: ${props => (props.disabled ? 'none' : 'auto')};
 `
