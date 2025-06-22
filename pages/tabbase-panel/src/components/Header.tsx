@@ -1,15 +1,14 @@
-import React, { use } from 'react'
-
+import React from 'react'
 import { Box } from '@mantine/core'
 
-import ScrollContent from './Features/Scroll'
 import { useAppDispatch, useAppSelector } from '@extension/tabbase-shared'
-import { onActChangeActiveSpace, onActGetSpaces } from '@extension/tabbase-shared/lib/redux/features/tab/tab.slice'
+import { onActGetSpaces } from '@extension/tabbase-shared/lib/redux/features/tab/tab.slice'
+
+import ScrollContent from './Features/Scroll'
 
 const Header: React.FC = () => {
   const dispatch = useAppDispatch()
   const spaces = useAppSelector(state => state.tab._spaces)
-  const _activeSpaceId = useAppSelector(state => state.tab._activeSpaceId)
 
   React.useEffect(() => {
     dispatch(onActGetSpaces())
@@ -17,7 +16,6 @@ const Header: React.FC = () => {
 
   const onChangeActiveSpace = (id: string) => {
     console.log(`Clicked on item with id: ${id}`)
-    dispatch(onActChangeActiveSpace({ activeSpaceId: id }))
   }
 
   return (
@@ -30,7 +28,7 @@ const Header: React.FC = () => {
                 onClick={id => {
                   onChangeActiveSpace(id)
                 }}
-                activeId={_activeSpaceId}
+                // activeId={_activeSpaceId}
                 items={[
                   ...spaces,
                   { id: 'new-tab-filter-1', name: '+ New Tab Filter', tabs: [], keywords: [], websites: [] },

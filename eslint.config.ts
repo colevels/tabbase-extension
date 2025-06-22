@@ -63,27 +63,11 @@ export default config(
           message: 'Please import from `@extension/shared` instead of `type-fest`.',
         },
       ],
-      '@typescript-eslint/consistent-type-imports': 'error',
+      '@typescript-eslint/consistent-type-imports': 'off',
       '@typescript-eslint/consistent-type-exports': 'error',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': 'warn',
       'no-unused-vars': 'off',
-      // 'import-x/order': [
-      //   'error',
-      //   {
-      //     'newlines-between': 'never',
-      //     alphabetize: { order: 'asc', caseInsensitive: true },
-      //     groups: ['index', 'sibling', 'parent', 'internal', 'external', 'builtin', 'object', 'type'],
-      //     pathGroups: [
-      //       {
-      //         pattern: '@*/**',
-      //         group: 'internal',
-      //         position: 'before',
-      //       },
-      //     ],
-      //     pathGroupsExcludedImportTypes: ['type'],
-      //   },
-      // ],
       'import-x/no-unresolved': 'off',
       'import-x/no-named-as-default': 'error',
       'import-x/no-named-as-default-member': 'off',

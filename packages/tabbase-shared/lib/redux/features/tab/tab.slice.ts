@@ -1,12 +1,15 @@
-import { createRange } from './utils.js'
+import _ from 'lodash'
+
+import { pinTabsStorage, optionStorage } from '../../../storage/index.js'
 import { formatTabs } from '../../../utils/index.js'
 import { createAppSlice } from '../../createAppSlice.js'
-import { pinTabsStorage } from '@extension/tabbase-storage'
-import _ from 'lodash'
-import type { ContainerSpace, TabMap } from './types.js'
+
+import type { PayloadAction } from '@reduxjs/toolkit'
+import type { Space, TabMap } from './types.js'
 import type { TabExtend } from '../../../utils/index.js'
 import type { RootState } from '../../store.js'
-import type { PayloadAction } from '@reduxjs/toolkit'
+
+// --> to storage --> to service
 
 interface tabSliceState {
   value: number
@@ -24,8 +27,17 @@ interface tabSliceState {
     tabId: number | null
   }
 
-  activeContainerSpace: string
-  containersSpaces: Record<string, ContainerSpace>
+  activeSpaceId: string
+  spaces: Record<string, Space>
+
+  profile?: {
+    id: string
+    name: string
+    premium: boolean
+  }
+
+  _spaces: any[]
+  _activeSpaceId?: string | null
 }
 
 const initialState: tabSliceState = {
@@ -34,7 +46,6 @@ const initialState: tabSliceState = {
 
   tabs: [],
   tabGroups: [],
-  tabsMap: {},
   tabIds: [],
   windows: [],
   context: {
@@ -42,23 +53,30 @@ const initialState: tabSliceState = {
     tabId: -99,
   },
 
-  activeContainerSpace: 'tabs',
+  activeSpaceId: 'tabs',
 
-  containersSpaces: {
+  profile: undefined,
+  _spaces: [],
+  _activeSpaceId: undefined,
+
+  tabsMap: {},
+
+  spaces: {
     base: {
       id: 'base',
       name: 'BASE',
+      tabMaps: {},
       containers: {
-        // tabs: [],
+        // tabs: [], // auto generated
         // pinTabs: [],
       },
     },
     tabs: {
       id: 'tabs',
       name: 'tabs',
-
+      tabMaps: {},
       containers: {
-        // tabs: [],
+        // tabs: [], // auto generated
         // pinTabs: createRange(1, index => `P${index + 1}`),
       },
     },
@@ -69,6 +87,164 @@ export const tabSlice = createAppSlice({
   name: 'tab',
   initialState,
   reducers: create => ({
+    onActGetExample: create.asyncThunk(
+      async () => {
+        const response = await fetch('https://tabbase.com/api/dev/spaces', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        })
+        const result = await response.json()
+        console.log('result', result)
+
+        const snapshot = pinTabsStorage.getSnapshot()
+        console.log('snapshot', snapshot)
+
+        const get = await pinTabsStorage.get()
+        console.log('snapshot get', get)
+
+        return result
+      },
+      {
+        pending: state => {
+          state.status = 'loading'
+        },
+        fulfilled: (state, action) => {
+          state.status = 'idle'
+          state.value += action.payload.data
+        },
+        rejected: state => {
+          state.status = 'failed'
+        },
+      },
+    ),
+
+    onActGetOptions: create.asyncThunk(
+      async () => {
+        const options = await optionStorage.get()
+        console.log('options', options)
+        return options
+      },
+      {
+        pending: state => {
+          state.status = 'loading'
+        },
+        fulfilled: (state, action) => {
+          console.log('fulfilled', action.payload)
+          state._activeSpaceId = action.payload.activeSpaceId || null
+        },
+        rejected: state => {
+          state.status = 'failed'
+        },
+      },
+    ),
+
+    onActGetProfile: create.asyncThunk(
+      async () => {
+        return {
+          id: '123',
+          name: 'John Doe',
+          premium: true,
+        }
+      },
+      {
+        pending: state => {
+          state.status = 'loading'
+        },
+        fulfilled: (state, action) => {
+          state.status = 'idle'
+          // state.value += action.payload.data
+          state.profile = action.payload
+        },
+        rejected: state => {
+          state.status = 'failed'
+        },
+      },
+    ),
+
+    onActGetSpaces: create.asyncThunk(
+      async () => {
+        return [
+          {
+            id: 'space1',
+            name: 'Space One',
+            description: 'This is the first space.',
+            createdAt: '2023-01-01T00:00:00Z',
+            updatedAt: '2023-01-02T00:00:00Z',
+          },
+          {
+            id: 'space2',
+            name: 'Space Two',
+            description: 'This is the second space.',
+            createdAt: '2023-01-03T00:00:00Z',
+            updatedAt: '2023-01-04T00:00:00Z',
+          },
+        ]
+      },
+      {
+        pending: state => {
+          state.status = 'loading'
+        },
+        fulfilled: (state, action) => {
+          state.status = 'idle'
+          state._spaces = action.payload
+          // state.value += action.payload.data
+        },
+        rejected: state => {
+          state.status = 'failed'
+        },
+      },
+    ),
+
+    onActGetActiveSpace: create.asyncThunk(
+      async (id: string) => {
+        // Simulate fetching active space by ID
+        return {
+          id,
+          name: `Active Space ${id}`,
+          description: `This is the active space with ID ${id}.`,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }
+      },
+      {
+        pending: state => {
+          state.status = 'loading'
+        },
+        fulfilled: (state, action) => {
+          state.status = 'idle'
+          // state.value += action.payload.data
+        },
+        rejected: state => {
+          state.status = 'failed'
+        },
+      },
+    ),
+
+    onActUpdateActiveSpace: create.asyncThunk(
+      async (id: string) => {
+        // Simulate updating active space by ID
+        return {
+          id,
+          name: `Updated Active Space ${id}`,
+          description: `This is the updated active space with ID ${id}.`,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }
+      },
+      {
+        pending: state => {
+          state.status = 'loading'
+        },
+        fulfilled: (state, action) => {
+          state.status = 'idle'
+          // state.value += action.payload.data
+        },
+        rejected: state => {
+          state.status = 'failed'
+        },
+      },
+    ),
+
     onActGetTabs: create.asyncThunk(
       async () => {
         const response = await chrome.tabs.query({})
@@ -93,12 +269,12 @@ export const tabSlice = createAppSlice({
           state.tabIds = action.payload.tabIds
           state.tabsMap = action.payload.tabsMap
 
-          // state.containersSpaces = {
-          //   ...state.containersSpaces,
-          //   [state.activeContainerSpace]: {
-          //     ...state.containersSpaces[state.activeContainerSpace],
+          // state.spaces = {
+          //   ...state.spaces,
+          //   [state.activeSpaceId]: {
+          //     ...state.spaces[state.activeSpaceId],
           //     containers: {
-          //       ...state.containersSpaces[state.activeContainerSpace].containers,
+          //       ...state.spaces[state.activeSpaceId].containers,
           //       // tabs: action.payload.tabIds.map(o => o.toString()),
           //     },
           //   },
@@ -116,20 +292,6 @@ export const tabSlice = createAppSlice({
         state.tabsMap[action.payload.tab.id] = tab
         state.tabs.push(tab)
         state.tabIds.push(action.payload.tab.id)
-
-        // state.containersSpaces = {
-        //   ...state.containersSpaces,
-        //   [state.activeContainerSpace]: {
-        //     ...state.containersSpaces[state.activeContainerSpace],
-        //     containers: {
-        //       ...state.containersSpaces[state.activeContainerSpace].containers,
-        //       tabs: [
-        //         ...state.containersSpaces[state.activeContainerSpace].containers.tabs,
-        //         action.payload.tab.id.toString(),
-        //       ],
-        //     },
-        //   },
-        // }
       }
     }),
     onActTabUpdated: create.reducer(
@@ -168,19 +330,6 @@ export const tabSlice = createAppSlice({
 
       if (Number.isFinite(tabId) && state.tabsMap[tabId]) {
         delete state.tabsMap[tabId]
-
-        // state.containersSpaces = {
-        //   ...state.containersSpaces,
-        //   [state.activeContainerSpace]: {
-        //     ...state.containersSpaces[state.activeContainerSpace],
-        //     containers: {
-        //       ...state.containersSpaces[state.activeContainerSpace].containers,
-        //       tabs: state.containersSpaces[state.activeContainerSpace].containers.tabs.filter(
-        //         o => o != tabId.toString(),
-        //       ),
-        //     },
-        //   },
-        // }
       }
     }),
 
@@ -335,10 +484,11 @@ export const tabSlice = createAppSlice({
       },
     ),
 
-    onActActiveContainerSpace: create.reducer((state, action: PayloadAction<{ activeContainerSpace: string }>) => {
-      state.activeContainerSpace = action.payload.activeContainerSpace
+    onActActiveContainerSpace: create.reducer((state, action: PayloadAction<{ activeSpaceId: string }>) => {
+      state.activeSpaceId = action.payload.activeSpaceId
     }),
 
+    // TODO
     updateItems: create.reducer((state, action: PayloadAction<{ id: string; items: string[] }>) => {
       console.log('update items', action.payload)
 
@@ -346,18 +496,30 @@ export const tabSlice = createAppSlice({
         return
       }
 
-      state.containersSpaces = {
-        ...state.containersSpaces,
-        [state.activeContainerSpace]: {
-          ...state.containersSpaces[state.activeContainerSpace],
+      console.log('new state', {
+        ...state.spaces[state.activeSpaceId].containers,
+        [action.payload.id]: action.payload.items,
+      })
+
+      // make tabs map
+      // const tapMaps =
+
+      // -- what happens if tab id not exists on other spaces
+      //
+
+      state.spaces = {
+        ...state.spaces,
+        [state.activeSpaceId]: {
+          ...state.spaces[state.activeSpaceId],
           containers: {
-            ...state.containersSpaces[state.activeContainerSpace].containers,
+            ...state.spaces[state.activeSpaceId].containers,
             [action.payload.id]: action.payload.items,
           },
         },
       }
     }),
 
+    // TODO
     onActPinTab: create.asyncThunk<boolean, { tabId: number | string }>(
       async (args, thunkApi) => {
         const tabs = thunkApi.getState() as RootState
@@ -380,7 +542,26 @@ export const tabSlice = createAppSlice({
         },
       },
     ),
+
+    onActChangeActiveSpace: create.asyncThunk(
+      async (args: { activeSpaceId: string }, thunkApi) => {
+        await optionStorage.updateActiveSpaceId(args.activeSpaceId)
+        return { activeSpaceId: args.activeSpaceId }
+      },
+      {
+        pending: state => {
+          state.status = 'loading'
+        },
+        fulfilled: (state, action) => {
+          state._activeSpaceId = action.payload.activeSpaceId
+        },
+        rejected: state => {
+          state.status = 'failed'
+        },
+      },
+    ),
   }),
+
   selectors: {
     selectCount: counter => counter.value,
     selectStatus: counter => counter.status,
@@ -404,6 +585,12 @@ export const {
   onActPinTab,
   updateItems,
   onActActiveContainerSpace,
+  onActGetExample,
+  onActGetProfile,
+  onActGetSpaces,
+  onActGetActiveSpace,
+  onActUpdateActiveSpace,
+  onActGetOptions,
 } = tabSlice.actions
 
 export const { selectCount, selectStatus } = tabSlice.selectors

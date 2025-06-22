@@ -31,7 +31,6 @@
   },
   "devDependencies": {
     "@extension/storage": "workspace:*",
-    "@extension/tabbase-storage": "workspace:*",
     "@extension/tsconfig": "workspace:*",
     "@types/lodash": "^4.17.16",
     "@types/redux-logger": "^3.0.13",
