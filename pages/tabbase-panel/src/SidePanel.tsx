@@ -1,23 +1,41 @@
+import React from 'react'
+import styled from 'styled-components'
+
 import '@src/SidePanel.css'
 
-import ChromeEventProvider from './components/ChromeEventProvider'
-// import TabBase from './components/Features/TabBase/TabBase'
-import TabBaseV2 from './components/Features/TabBaseNew/TabBase'
-import Header from './components/Section/Header'
+import { useAppDispatch } from '@extension/tabbase-shared'
+import { onActGetExample } from '@extension/tabbase-shared/lib/redux/features/tab/tab.slice'
+
 import { withErrorBoundary, withSuspense } from '@extension/shared'
 
-const SidePanel = () => {
-  console.log('SidePanel render')
+import ProfileContainer from './components/ProfileContainer'
+import ChromeContainer from './components/ChromeContainer'
 
-  // return <div>A</div>
+import Header from './components/Header'
+import Body from './components/Body'
+import Error from './components/Error'
+
+const StyledContainer = styled.div`
+  padding: 10px;
+`
+
+const SidePanel = () => {
+  const dispatch = useAppDispatch()
+
+  React.useEffect(() => {
+    dispatch(onActGetExample())
+  }, [dispatch])
+
   return (
-    <ChromeEventProvider>
-      <div>
-        <Header title="test" />
-        <TabBaseV2 />
-      </div>
-    </ChromeEventProvider>
+    <ChromeContainer>
+      <ProfileContainer>
+        <StyledContainer>
+          <Header />
+          <Body />
+        </StyledContainer>
+      </ProfileContainer>
+    </ChromeContainer>
   )
 }
 
-export default withErrorBoundary(withSuspense(SidePanel, <div> Loading ... </div>), <div>Error Occur</div>)
+export default withErrorBoundary(withSuspense(SidePanel, <div> Loading ... </div>), Error)
