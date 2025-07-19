@@ -24,8 +24,9 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.6.1",
-    "react-error-boundary": "^6.0.0",
+    "axios": "^1.10.0",
     "lodash": "^4.17.21",
+    "react-error-boundary": "^6.0.0",
     "react-redux": "^9.2.0",
     "redux-logger": "^3.0.6"
   },

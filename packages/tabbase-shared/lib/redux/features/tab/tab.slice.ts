@@ -3,6 +3,7 @@ import _ from 'lodash'
 import { pinTabsStorage, optionStorage } from '../../../storage/index.js'
 import { formatTabs } from '../../../utils/index.js'
 import { createAppSlice } from '../../createAppSlice.js'
+import api from '../../../api/index.js'
 
 import type { PayloadAction } from '@reduxjs/toolkit'
 import type { Space, TabMap } from './types.js'
@@ -103,6 +104,25 @@ export const tabSlice = createAppSlice({
         console.log('snapshot get', get)
 
         return result
+      },
+      {
+        pending: state => {
+          state.status = 'loading'
+        },
+        fulfilled: (state, action) => {
+          state.status = 'idle'
+          state.value += action.payload.data
+        },
+        rejected: state => {
+          state.status = 'failed'
+        },
+      },
+    ),
+
+    onActUpdateSpace: create.asyncThunk(
+      async (spaceId: string, data: any) => {
+        await api.updateSpace(spaceId, data)
+        return data
       },
       {
         pending: state => {
